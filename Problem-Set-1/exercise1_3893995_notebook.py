@@ -160,14 +160,20 @@ class Graph():
         :return: This returns a graph object which is undirected.
         :rtype: Graph
         """
-        undirected_graph = deepcopy(self)
-        adjacency_list = undirected_graph.get_adjacency_list()
+        undirected_graph = Graph()
+        adjacency_list = self.get_adjacency_list()
 
+        # Add vertices to the undirected graph
+        for vertex in adjacency_list.keys():
+            undirected_graph.add_vertex(vertex)
+
+        # Add edges to the undirected graph
         for vertex, edges in adjacency_list.items():
             for edge in edges:
-                if vertex != edge:
-                    undirected_graph.add_edge(edge, vertex)
+                undirected_graph.add_edge(edge, vertex)
+                undirected_graph.add_edge(vertex, edge)
 
+        # Remove self-loops from the undirected graph
         for vertex, edges in adjacency_list.items():
             if vertex in edges:
                 undirected_graph.adjacency_list[vertex].remove(vertex)
@@ -210,8 +216,8 @@ class Graph():
         :return: A new graph with the edge inverted.
         :rtype: Graph
         """
-        inverted_graph = deepcopy(self)
-        adjacency_list = inverted_graph.get_adjacency_list()
+        inverted_graph = Graph()
+        adjacency_list = self.get_adjacency_list()
         new_adjacency_list = {vertex: set() for vertex in adjacency_list}
 
         for vertex, edges in adjacency_list.items():
