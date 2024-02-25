@@ -152,5 +152,75 @@ class Graph():
             adjacency_list[i] = set(np.where(vertex == 1)[0])
         return adjacency_list
 
+############ CODE BLOCK 4 ################
+    def to_undirected_graph(self):
+        """
+        This method returns the undirected graph based on the direct graph (self).
+
+        :return: This returns a graph object which is undirected.
+        :rtype: Graph
+        """
+        undirected_graph = deepcopy(self)
+        adjacency_list = undirected_graph.get_adjacency_list()
+
+        for vertex, edges in adjacency_list.items():
+            for edge in edges:
+                if vertex != edge:
+                    undirected_graph.add_edge(edge, vertex)
+
+        for vertex, edges in adjacency_list.items():
+            if vertex in edges:
+                undirected_graph.adjacency_list[vertex].remove(vertex)
+
+        return undirected_graph
+
+############ CODE BLOCK 5 ################
+    def has_two_or_less_odd_vertices(self):
+        """
+        This method determines if an undirected graph has at most two vertices with an odd number of neighbours.
+        
+        Any graph can be used but should first be converted into a undirected graph, 
+        which is already given in the code below.
+        
+        Note that a reflexive edge, i.e. an edge that connects a vertex to itself, should be ignored. 
+        For example the partial adjacency list: `4: {4, 2, 1}` has an even number of neighbours.
+        
+        :return: True if graph contains at most two vertices with odd number of neighbours, False otherwise.
+        :rtype: bool
+        """
+        g = self.to_undirected_graph()
+        odd_count = 0
+        for vertex, neighbors in g.get_adjacency_list().items():
+            neighbor_count = len(neighbors)
+            if vertex in neighbors:
+                neighbor_count -= 1
+            if neighbor_count % 2 != 0:
+                odd_count += 1
+                if odd_count > 2:
+                    return False
+        return True
+
+############ CODE BLOCK 6 ################
+    def invert_edges(self):
+        """
+        This method inverts all edges of a graph.
+
+        Note, that inverting the edges of an undirected graph returns the same graph.
+        
+        :return: A new graph with the edge inverted.
+        :rtype: Graph
+        """
+        inverted_graph = deepcopy(self)
+        adjacency_list = inverted_graph.get_adjacency_list()
+        new_adjacency_list = {vertex: set() for vertex in adjacency_list}
+
+        for vertex, edges in adjacency_list.items():
+            for edge in edges:
+                new_adjacency_list[edge].add(vertex)
+
+        inverted_graph.set_adjacency_list(new_adjacency_list)
+
+        return inverted_graph
+
 
 ############ END OF CODE BLOCKS, START SCRIPT BELOW! ################
