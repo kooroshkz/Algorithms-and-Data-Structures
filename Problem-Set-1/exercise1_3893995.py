@@ -103,7 +103,7 @@ class Graph():
         """
 
         vertices = list(adjacency_list.keys())
-        vertices.sort()
+        # vertices.sort()
         n = len(vertices)
         adjacency_matrix = np.zeros((n, n), dtype=int)
         for i, vertex in enumerate(vertices):
