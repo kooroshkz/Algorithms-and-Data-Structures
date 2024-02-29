@@ -51,15 +51,5 @@ class Sudoku():
         
         return preview
 
-############ CODE BLOCK 11 ################
-    def set_grid(self, grid):
-        """
-        This method sets a new grid. This also can change the size of the sudoku.
-
-        :param grid: A 2D numpy array that contains the digits for the grid.
-        :type grid: ndarray[(Any, Any), int]
-        """
-        raise NotImplementedError("Please complete this method")
-
 
 ############ END OF CODE BLOCKS, START SCRIPT BELOW! ################
