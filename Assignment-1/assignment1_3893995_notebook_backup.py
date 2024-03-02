@@ -51,5 +51,85 @@ class Sudoku():
         
         return preview
 
+############ CODE BLOCK 11 ################
+    def set_grid(self, grid):
+        """
+        This method sets a new grid. This also can change the size of the sudoku.
+
+        :param grid: A 2D numpy array that contains the digits for the grid.
+        :type grid: ndarray[(Any, Any), int]
+        """
+        # simply set the object attribute grid to a new one with any value
+        if len(grid) == len(self.grid):
+            self.grid = grid
+        else:
+            raise ValueError("The size of the new grid does not match the size of the sudoku")
+
+############ CODE BLOCK 12 ################
+    def get_row(self, row_id):
+        """
+        This method returns the row with index row_id.
+
+        :param row_id: The index of the row.
+        :type row_id: int
+        :return: A row of the sudoku.
+        :rtype: np.ndarray[(Any,), int]
+        """
+        return self.grid[row_id, :]
+
+    def get_col(self, col_id):
+        """
+        This method returns the column with index col_id.
+
+        :param col_id: The index of the column.
+        :type col_id: int
+        :return: A row of the sudoku.
+        :rtype: np.ndarray[(Any,), int]
+        """
+        return self.grid[:, col_id]
+
+    def get_box_index(self, row, col):
+        """
+        This returns the box index of a cell given the row and column index.
+        
+        :param col: The column index.
+        :type col: int
+        :param row: The row index.
+        :type row: int
+        :return: This returns the box index of a cell.
+        :rtype: int
+        """
+        index_size = int(len(self.grid)**0.5)
+        col_box_id = 0
+        # find the column box index
+        for index in range(index_size):
+            # determine in which box index column we are
+            if index_size * (index + 1) > col and col > index_size*index:
+                col_box_id = index
+        
+        row_box_id = 0
+
+        for index_r in range(index_size):
+            # determine in which box index row we are
+            if index_size * (index_r + 1) > row and row > index_size*index_r:
+                row_box_id = index_r
+
+        index_array = np.arange(len(self.grid))
+        index_array = index_array.reshape(index_size, index_size)
+        # find the box index
+        return index_array[row_box_id][col_box_id]
+
+
+    def get_box(self, box_id):
+        """
+        This method returns the "box_id" box.
+
+        :param box_id: The index of the sudoku box.
+        :type box_id: int
+        :return: A box of the sudoku.
+        :rtype: np.ndarray[(Any, Any), int]
+        """
+        raise NotImplementedError("Please complete this method")
+
 
 ############ END OF CODE BLOCKS, START SCRIPT BELOW! ################
