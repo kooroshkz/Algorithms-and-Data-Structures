@@ -27,7 +27,9 @@ Stay updated with the status of your assignments:
 
 ## Task lists
 
-- [ $\checkmark$] Add Team project 1 to Codespace
-- [ $\checkmark$] Complete task 1.0 of Team project 1
-- [$\quad$] Make task 1.0 more comperhensive + add comments
-- [$\quad$] Complete task 1.0 of Team project 1
+| Status | Assigned to | Detail
+|--------|-------------|---------------|
+|$\checkmark$| Koorosh | Add Team project 1 to Codespace |
+|$\checkmark$| Koorosh | Complete task 1.0 of Team project 1 |
+|            | Koorosh | Make task 1.0 more comperhensive + add comments |
+|            | Koorosh | Complete task 1.0 of Team project 1 |
