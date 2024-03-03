@@ -154,5 +154,68 @@ class Sudoku():
                     # slice the sudoku at respective box indicies
                     return self.grid[r_index*index_size:(r_index+1)*index_size, c_index*index_size:(c_index+1)*index_size]
 
+############ CODE BLOCK 13 ################
+    @staticmethod
+    def is_set_correct(numbers):
+        """
+        This method checks if a set (row, column, or box) is correct according to the rules of a sudoku.
+        In other words, this method checks if a set of numbers contains duplicate values between 1 and the size of the sudoku.
+        Note, that multiple empty cells are not considered duplicates.
+
+        :param numbers: The numbers of a sudoku's row, column, or box.
+        :type numbers: np.ndarray[(Any, Any), int] or np.ndarray[(Any, ), int]
+        :return: This method returns if the set is correct or not.
+        :rtype: Boolean
+        """
+
+        try:
+            if numbers.shape[1]:
+                numbers = numbers.flatten()
+        except IndexError:
+            pass
+        
+        # filter out zeros
+        filtered_numbers = numbers[numbers != 0]
+        
+        # check if the filtered set contains duplicates
+        return len(filtered_numbers) == len(np.unique(filtered_numbers))
+
+
+    def check_cell(self, row, col):
+        """
+        This method checks if the cell, denoted by row and column, is correct according to the rules of sudoku.
+        
+        :param col: The column index that is tested.
+        :type col: int
+        :param row: The row index that is tested.
+        :type row: int
+        :return: This method returns if the cell, denoted by row and column, is correct compared to the rest of the grid.
+        :rtype: boolean
+        """
+        # check if the row, column and box are correct
+        is_row_correct = self.is_set_correct(self.get_row(row))
+        is_col_correct = self.is_set_correct(self.get_col(col))
+        is_box_correct = self.is_set_correct(self.get_box(self.get_box_index(row, col)))
+        
+        return is_row_correct and is_col_correct and is_box_correct
+
+    def check_sudoku(self):
+        """
+        This method checks, for all rows, columns, and boxes, if they are correct according to the rules of a sudoku.
+        In other words, this method checks, for all rows, columns, and boxes, if a set of numbers contains duplicate values between 1 and the size of the sudoku.
+        Note, that multiple empty cells are not considered duplicates.
+
+        Hint: It is not needed to check if every cell is correct to check if a complete sudoku is correct.
+
+        :return: This method returns if the (partial) Sudoku is correct.
+        :rtype: Boolean
+        """
+
+        # check if all rows, columns and boxes are correct to show if the sudoku is correct.
+        for index in range(len(self.grid)):
+            if not self.is_set_correct(self.get_row(index)) or not self.is_set_correct(self.get_col(index)) or not self.is_set_correct(self.get_box(index)):
+                return False
+        return True
+
 
 ############ END OF CODE BLOCKS, START SCRIPT BELOW! ################
