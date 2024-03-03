@@ -32,22 +32,32 @@ class Sudoku():
         :return: A string representing the Sudoku object.
         :rtype: str
         """
-        # Change this to anything you like, such that you can easily print a Sudoku object.
-        preview = ""
-        self.sqrt = int(np.sqrt(self.size))
+        preview = "" # Empty string to add the sudoku grid to.
+
+        # To avoid multiple attribute lookups
+        max_digits = len(str(self.size))
+        sqrt = int(self.size ** 0.5)
+        grid = self.grid  
         
-        for i in range(self.size):
-            counter = 0
-            for j in range(len(self.grid[i])):
-                preview += str(int(self.grid[i][j])) + " "
-                counter += 1
-                if counter == self.sqrt and j != len(self.grid[i]) - 1:
-                    preview += "| "
-                    counter = 0
+        # Iterate through each row of the grid.
+        for row in range(self.size):
+            # Iterate through each element in the row.
+            for column in range(len(grid[row])):
+                cell_value = int(grid[row][column])
+                digits = len(str(cell_value)) if cell_value != 0 else 1
+                preview += str(cell_value) + " " * (max_digits - digits + 1)
+                
+                # Add a vertical separator after every square root number of elements, except for the last element in the row.
+                if (column + 1) % sqrt == 0 and column != len(grid[row]) - 1:
+                    preview += " "
+            
+            # Remove trailing whitespace and add a newline after every square root number of rows.
             preview = preview.rstrip()
             preview += "\n"
-            if (i + 1) % self.sqrt == 0 and i != len(self.grid) - 1:
-                preview += "-" * (2 * self.size + self.sqrt) + "\n"
+            
+            # Add a horizontal separator after every square root number of rows, except for the last row.
+            if (row + 1) % sqrt == 0 and row != len(grid) - 1:
+                preview += "\n"
         
         return preview
 
@@ -59,7 +69,7 @@ class Sudoku():
         :param grid: A 2D numpy array that contains the digits for the grid.
         :type grid: ndarray[(Any, Any), int]
         """
-        # simply set the object attribute grid to a new one with any value
+        # simply set the object attribute grid to a new one with any value if it matches the size
         if len(grid) == len(self.grid):
             self.grid = grid
         else:
@@ -141,6 +151,7 @@ class Sudoku():
         for r_index, row in enumerate(index_array):
             for c_index, value in enumerate(row):
                 if value == box_id:
+                    # slice the sudoku at respective box indicies
                     return self.grid[r_index*index_size:(r_index+1)*index_size, c_index*index_size:(c_index+1)*index_size]
 
 
