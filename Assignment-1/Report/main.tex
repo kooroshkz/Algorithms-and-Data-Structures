@@ -1,0 +1,166 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+ \geometry{
+ a4paper,
+ total={170mm,257mm},
+ left=20mm,
+ top=20mm,
+ }
+ \usepackage{graphicx}
+ \usepackage{titling}
+ \usepackage{hyperref}
+ \usepackage{biblatex}
+\addbibresource{references.bib}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+
+
+
+ \title{Algorithms and Data Structures - Assignment X (insert number)
+}
+\date{\today}
+\makeatletter
+\def\@maketitle{%
+  \newpage
+  \null
+  \vskip 1em%
+  \begin{center}%
+  \let \footnote \thanks
+    {\LARGE \@title \par}%
+    \vskip 1em%
+    %{\large \@date}%
+  \end{center}%
+  \par
+  \vskip 1em}
+\makeatother
+
+\usepackage{lipsum}  
+\usepackage{cmbright}
+
+\begin{document}
+
+\maketitle
+
+
+\section*{Introduction}
+Introduction text. 
+
+
+
+\section*{Assignment specific question 1}
+More text.
+
+\section*{Assignment specific question 2}
+And more text. 
+
+\section*{etc.}
+And even more text. 
+
+
+
+\section*{Summary and Discussion}
+Do not write about your personal experience and stories. Keep it scientific and simply summarize the report, making observations about the algorithms and questions. Make sure not to introduce any new observations in this section.
+Also, make sure not to exceed the page limit. 
+
+
+
+
+
+
+\section*{Contributions}
+% In this section please write the contributions for each team member for the report and the code. Write down who did what.
+
+Note that this does \textbf{not} count towards the page limit (just like the references). 
+
+\noindent\begin{tabular}{@{}ll}
+
+Student full name 1 (Student number): Introduction Report, Code for functions ... and ...  \\
+Student full name 2 (Student number): Conclusion Report, code for functions ... and ...
+\\
+
+\end{tabular}
+
+\printbibliography
+
+
+\newpage
+
+\section*{Appendix: Code packages}
+While writing your assignment report you might want to use certain graphics, tables or equations to explain your assignment and code. We compiled some of the most used graphics. It is not mandatory to use these specific graphics, but it may assist you while creating your report. \textbf{Please delete the appendix when submitting your report.}
+
+
+\subsection*{Figures/images}
+If you want to use images / figures in LaTeX, you can use the "\textbackslash begin\{figure\}" in your text. Please make sure that every figure you use has a description of the image. An example of a figure can be found below.
+
+\begin{figure}[ht!]
+    \centering
+        \includegraphics[width=5cm]{figures/ul-algemeen-internationaal-rgb-color.png}
+        \caption{The logo of Leiden University}
+    \label{fig:my_label}
+\end{figure}
+
+It is allowed to draw diagrams (if asked) or search trees by hand, scan the result, and use it in the assignment, as long as the handwriting is readable.  
+
+\subsection*{Tables}
+If you want, you can create tables in your report. There are many different \LaTeX -table generator online which can greatly help you create tables. Or you can use the example below
+
+\begin{table}[ht!]
+\centering
+    \begin{tabular}{l|l|l|l|}
+        \cline{2-4}
+                                         & \textbf{Experiment 1} & \textbf{Experiment 2} & \textbf{Experiment 3} \\ \hline
+        \multicolumn{1}{|l|}{\textbf{A}} & 0.1                   & 0.3                   & 0.1                   \\ \hline
+        \multicolumn{1}{|l|}{\textbf{B}} & 0.1                   & 0.3                   & 0.1                   \\ \hline
+        \multicolumn{1}{|l|}{\textbf{C}} & 0.1                   & 0.3                   & 0.1                   \\ \hline
+    \end{tabular}
+\caption{Example table with description}
+\label{tab:example-table}
+\end{table}
+
+
+\subsection*{Equations}
+If you want to use equations in LaTeX, please use the "\textbackslash begin\{equation\} command in your text. You can also write equations in-line of text, like this $E=MC^2$.
+
+\begin{figure}[ht]
+    \centering
+    \begin{equation}
+    E = MC^2
+    \end{equation}
+
+    \caption{Mass-energy equivalance where $E$ is engery, $M$ is mass and $C$ is the speed of light }
+    \label{equation:my_label}
+\end{figure}
+
+
+\newpage
+\subsection*{Pseudocode}
+If you want to write pseudocode in the document to explain something, you can use the following package and command. 
+
+\begin{algorithm}[!ht]
+\SetAlgoLined
+\SetKwInOut{Input}{Input}\SetKwInOut{Termination}{Termination}
+
+\Input{Parent population size $\mu$\\ Offspring population size $\lambda$ \\ Mutation Rate $p_m$ \\ Budget $B$ \\ Upper-bound $u$ \\ Lower-bound $l$}
+\Termination{The algorithm terminates when budget is depleted or Global optimum is reached}
+\BlankLine
+
+Initialization parent population randomly with values between $u$ and $l$
+Evaluate fitness parent population\;
+\
+
+\While{termination criteria is not met}{
+Recombination\;
+Mutation\;
+Offspring evaluation\;
+Offspring selection\;
+Replace parents with selected offspring\;
+}
+\caption{A framework of Evolutionary Strategy (ES) \\ 
+\emph{Evolutionary strategy performs optimization on real-values and tries to find the global optimum using different genetic operators such as selection, recombination and mutation. }}\label{al:LOF}
+\end{algorithm}
+
+\subsection*{References}
+
+If you want to reference a book, or website, or any other used resources, you can add them to the ``references.bib'' file and refer to it like this \cite{example}.
+
+\end{document}
