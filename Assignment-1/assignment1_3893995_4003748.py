@@ -176,10 +176,10 @@ class Sudoku():
             pass
         
         # filter out zeros
-        filtered_numbers = numbers[numbers != 0]
+        filtered_numbers = [number for number in numbers if number != 0]
         
         # check if the filtered set contains duplicates
-        return len(filtered_numbers) == len(np.unique(filtered_numbers))
+        return len(filtered_numbers) == len(set(filtered_numbers))
 
 
     def check_cell(self, row, col):
@@ -241,21 +241,30 @@ class Sudoku():
         :return: This method returns if a correct solution can be found using this step.
         :rtype: boolean
         """
-        # if the current cell is already filled, go to the next cell
+        
+        
+        # If the current cell is already filled, move to the next
         if self.grid[row][col] != 0:
             return self.next_step(row, col, backtracking)
-        
-        # iterate through all possible numbers
+
+        # Iterate all possible numbers
         for number in range(1, len(self.grid) + 1):
-            # fill in the cell with the number
+            # Fill in the number
             self.grid[row][col] = number
-            # check if the number is correct
-            if self.check_cell(row, col):
-                # go to the next cell
-                if self.next_step(row, col, backtracking):
-                    return True
-        # if no number is correct, clean up the cell and go back to the previous cell
-        return self.clean_up(row, col)
+
+            # determine if we use backtracking and if yes,
+            # then check if we can add the current cell,
+            # if not, then try the next number
+            if backtracking and not self.check_cell(row, col):
+                continue
+            
+            # Move to the next one
+            if self.next_step(row, col, backtracking):
+                return True
+
+        self.clean_up(row, col)
+        return False
+
 
     def next_step(self, row, col, backtracking):
         """
@@ -273,14 +282,16 @@ class Sudoku():
         :return: This method returns if a correct solution can be found using this next step.
         :rtype: boolean
         """
-        # if the current cell is the last cell, check if the sudoku is correct
+
+        # reach the end and check if the solution is correct
+        # this is done here and not in step, because we need to add the 
+        # value corresponding to the last cell before returning the sudoku
         if row == len(self.grid) - 1 and col == len(self.grid) - 1:
             return self.check_sudoku()
-        # if the current cell is the last cell in the row, go to the next row
-        if col == len(self.grid) - 1:
-            return self.step(row + 1, 0, backtracking)
-        # go to the next cell
-        return self.step(row, col + 1, backtracking)
+       
+        next_row = row + (col + 1) // len(self.grid)  # Calculate next row index
+        next_col = (col + 1) % len(self.grid) # explanation needed
+        return self.step(next_row, next_col, backtracking)
     
     def clean_up(self, row, col):
         """
