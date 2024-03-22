@@ -71,7 +71,9 @@ class TestTree(unittest.TestCase):
                               filter(lambda x: x[0] != "_",  dir(g)),
                               msg=f"The class Sudoku does not have the right methods!")
 
-if __name__ == "__main__":
+# run the unittest if the file is just run as a normal python file (without extra command line options)
+if __name__ == "__main__" and Path.cwd() / sys.argv[0] == Path.cwd() / __file__:
+    # Run the tests
     for tests in [obj for obj in dir() if obj[:4] == "Test"]:
         suite = unittest.TestLoader().loadTestsFromTestCase(locals()[tests])
         unittest.TextTestRunner(verbosity=2).run(suite)
