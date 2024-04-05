@@ -241,12 +241,12 @@ class Sudoku():
         :return: This method returns if a correct solution can be found using this step.
         :rtype: boolean
         """
-        
-        
+
         # If the current cell is already filled, move to the next
         if self.grid[row][col] != 0:
             return self.next_step(row, col, backtracking)
 
+       
         # Iterate all possible numbers
         for number in range(1, len(self.grid) + 1):
             # Fill in the number
@@ -257,11 +257,11 @@ class Sudoku():
             # if not, then try the next number
             if backtracking and not self.check_cell(row, col):
                 continue
-            
+
             # Move to the next one
             if self.next_step(row, col, backtracking):
                 return True
-
+            
         self.clean_up(row, col)
         return False
 
@@ -288,9 +288,14 @@ class Sudoku():
         # value corresponding to the last cell before returning the sudoku
         if row == len(self.grid) - 1 and col == len(self.grid) - 1:
             return self.check_sudoku()
-       
-        next_row = row + (col + 1) // len(self.grid)  # Calculate next row index
-        next_col = (col + 1) % len(self.grid) # explanation needed
+
+        # calculate the next row index using integer division, we only increment the row
+        # when we are at the last column
+        next_row = row + (col + 1) // len(self.grid)  
+        # by using modulo arithmetic we can easily get the next column, as long as 
+        # we are not at the right end of the grid we keep increasing the column, if we reach 
+        # the end the column is then reset to 0
+        next_col = (col + 1) % len(self.grid) 
         return self.step(next_row, next_col, backtracking)
     
     def clean_up(self, row, col):
