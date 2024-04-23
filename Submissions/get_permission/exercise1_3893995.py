@@ -39,6 +39,7 @@ class Graph():
             
         self.adjacency_list[vertex] = set()
 
+
     def add_edge(self, source, destination):
         """
         This adds an edge to the graph.
@@ -54,7 +55,7 @@ class Graph():
             raise ValueError(f"The vertex name {destination} does not exist in the graph")
 
         self.adjacency_list[source].add(destination)
-        
+
     def set_adjacency_list(self, adjacency_list):
         """
         This uses the input to adjacency_list to set the graph.
@@ -101,17 +102,14 @@ class Graph():
         :return: A 2D numpy array containing the adjacency matrix
         :rtype: np.ndarray[bool]
         """
-
         vertices = list(adjacency_list.keys())
-        # vertices.sort()
-        n = len(vertices)
-        adjacency_matrix = np.zeros((n, n), dtype=int)
+        matrix = np.zeros((len(vertices), len(vertices)), dtype=int)
         for i, vertex in enumerate(vertices):
             for edge in adjacency_list[vertex]:
                 j = vertices.index(edge)
-                adjacency_matrix[i, j] = 1
-        return adjacency_matrix
-
+                matrix[i, j] = 1
+        return matrix
+    
     def show(self):
         """
         This method shows the current graph.
@@ -148,8 +146,8 @@ class Graph():
         :rtype: dict[int, set[int]]
         """
         adjacency_list = {}
-        for i, vertex in enumerate(adjacency_matrix):
-            adjacency_list[i] = set(np.where(vertex == 1)[0])
+        for i, row in enumerate(adjacency_matrix):
+            adjacency_list[i] = set(np.where(row == 1)[0])
         return adjacency_list
 
 ############ CODE BLOCK 4 ################
@@ -160,24 +158,10 @@ class Graph():
         :return: This returns a graph object which is undirected.
         :rtype: Graph
         """
-        undirected_graph = Graph()
-        adjacency_list = self.get_adjacency_list()
-
-        # Add vertices to the undirected graph
-        for vertex in adjacency_list.keys():
-            undirected_graph.add_vertex(vertex)
-
-        # Add edges to the undirected graph
-        for vertex, edges in adjacency_list.items():
+        undirected_graph = copy.deepcopy(self)
+        for vertex, edges in self.adjacency_list.items():
             for edge in edges:
                 undirected_graph.add_edge(edge, vertex)
-                undirected_graph.add_edge(vertex, edge)
-
-        # Remove self-loops from the undirected graph
-        for vertex, edges in adjacency_list.items():
-            if vertex in edges:
-                undirected_graph.adjacency_list[vertex].remove(vertex)
-
         return undirected_graph
 
 ############ CODE BLOCK 5 ################
@@ -195,16 +179,11 @@ class Graph():
         :rtype: bool
         """
         g = self.to_undirected_graph()
-        odd_count = 0
-        for vertex, neighbors in g.get_adjacency_list().items():
-            neighbor_count = len(neighbors)
-            if vertex in neighbors:
-                neighbor_count -= 1
-            if neighbor_count % 2 != 0:
-                odd_count += 1
-                if odd_count > 2:
-                    return False
-        return True
+        odd_vertices = 0
+        for vertex, edges in g.adjacency_list.items():
+            if len(edges) % 2 == 1 and vertex not in edges:
+                odd_vertices += 1
+        return odd_vertices <= 2
 
 ############ CODE BLOCK 6 ################
     def invert_edges(self):
@@ -216,16 +195,10 @@ class Graph():
         :return: A new graph with the edge inverted.
         :rtype: Graph
         """
-        inverted_graph = Graph()
-        adjacency_list = self.get_adjacency_list()
-        new_adjacency_list = {vertex: set() for vertex in adjacency_list}
-
-        for vertex, edges in adjacency_list.items():
+        inverted_graph = copy.deepcopy(self)
+        for vertex, edges in self.adjacency_list.items():
             for edge in edges:
-                new_adjacency_list[edge].add(vertex)
-
-        inverted_graph.set_adjacency_list(new_adjacency_list)
-
+                inverted_graph.add_edge(edge, vertex)
         return inverted_graph
 
 
