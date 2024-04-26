@@ -305,7 +305,7 @@ class Graph():
             for destination in destinations:
                 adjacency_list[destination].add(source)
             
-        return adjacency_list       
+        return adjacency_list    
 
     def set_graph(self, adjacency_list):
         """
@@ -318,8 +318,8 @@ class Graph():
         :type adjacency_list: dict[str/int, set[str/int]]
         """
         self.adjacency_list = adjacency_list
-        self.color_list = {node: None for node in adjacency_list.keys()}
-        
+        self.color_list = {node: None for node in self.adjacency_list}
+
     def show(self):
         """
         This method shows the current graph.
@@ -359,16 +359,13 @@ class Graph():
         :param nodes: A list of nodes that are not colored yet.
         :type nodes: list[int/str]
         """
-        if not nodes:
-            return True
-        
-        node = nodes[0]
-        for color in self.colors:
-            if self._is_correct(node, color):
+        for node in nodes:
+            for color in self.colors:
                 self.color_list[node] = color
-                if self._step(self._next_step(nodes)):
-                    return True
-                self._clean_up(node)
+                if self._is_correct(node):
+                    if self._next_step(nodes):
+                        return True
+            self._clean_up(node)
         return False
 
     def _clean_up(self, node):
@@ -387,7 +384,10 @@ class Graph():
         :param nodes: A list of nodes that are not colored yet.
         :type nodes: list[int/str]
         """
-        return nodes[1:]
+        if not nodes:
+            return True
+        next_node = nodes.pop()
+        return self._step(nodes)
     
     def _is_correct(self, node):
         """
@@ -396,10 +396,33 @@ class Graph():
         :param node: The current node that is being colored
         :type node: int/str
         """
-        for neighbour in self.adjacency_list[node]:
-            if self.color_list[neighbour] == self.color_list[node]:
+        for neighbor in self.adjacency_list[node]:
+            if self.color_list[neighbor] == self.color_list[node]:
                 return False
         return True
+
+############ CODE BLOCK 40 ################
+class PermutationsGenerator(Permutations):
+    def step(self, chosen_list):
+        """
+        This method adds one value to the new permutated list and
+        and calls next_step to generate a new set of actions.
+        
+        :param chosen_list: This list contains all objects chosen so far.
+        :type chosen_list: list[Objects]
+        :return: A list containing all the permutations, from the current space-state.
+        :type: list[list[Objects]]
+        """
+        # If the permutation is correct, we can return it.
+        if len(chosen_list) == len(self.list):
+            return [chosen_list]
+
+        # If the permutation is incorrect, we can return an empty list.
+        if not self.is_not_incorrect(chosen_list):
+            return []
+
+        # If the permutation is not incorrect, we can generate the next step.
+        return self.next_step(chosen_list, self.list)
 
 
 ############ END OF CODE BLOCKS, START SCRIPT BELOW! ################
