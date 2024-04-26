@@ -196,5 +196,240 @@ class SolveDoorRingPuzzle():
         """
         return self.step(ring)
 
+############ CODE BLOCK 30 ################
+class Node():
+    def __init__(self, value, left=None, middle=None, right=None):
+        """
+        This is a node for a ternary tree.
+
+        Attributes:
+            :param info: The value of the node.
+            :type: info: int
+            :param left: The left child of the node, defaults to None
+            :type left: Node, optional
+            :param middle: The left child of the node, defaults to None
+            :type middle: Node, optional
+            :param right: The left child of the node, defaults to None
+            :type right: Node, optional
+        """
+        self.info = value
+        self.left = left
+        self.middle = middle
+        self.right = right
+
+    def __repr__(self):
+        return f"Node({self.info}) -> {self.left.info if self.left is not None else 'None', self.middle.info if self.middle is not None else 'None', self.right.info if self.right is not None else 'None'}"
+
+class TernaryTree():
+    def __init__(self):
+        """
+        This initializes the tree which is always initialized as an empty tree.
+
+        Attributes:
+            :param root: The root of the tree
+            :type root: Node
+        """
+        self.root = None
+
+    def add(self, value):
+        """
+        Randomly add values to the tree.
+        You could do this by randomly traversing the tree and 
+        add a new node when a empty leaf node is found.
+
+        :param value: The value that is added to the tree
+        :type value: int       
+        """
+        if self.root is None:
+            self.root = Node(value)
+        else:
+            self.__add(value, self.root)  
+
+    def show(self):
+        """
+        This method shows the tree, where the root node is colored blue, 
+        the left nodes are colored green, and the right nodes are colored red.
+        """
+        if self.root is None:
+            raise ValueError("This is an empty tree and can not be show.")
+            
+        # Recursively add all edges and nodes.
+        def add_node_edge(G, color_map, parent_graph_node, node):
+            # In case of printing a binary tree check if a node exists
+            if node.info in G:
+                i = 2
+                while f"{node.info}_{i}" in G:
+                    i += 1
+                node_name = f"{node.info}_{i}"
+            else:
+                node_name = node.info
+            G.add_node(node_name)
+
+            # Make root node or edge to parent node
+            if parent_graph_node is not None:
+                G.add_edge(parent_graph_node, node_name)
+            
+            if node.left is not None:
+                add_node_edge(G, color_map, node_name, node.left)
+            if node.middle is not None:
+                add_node_edge(G, color_map, node_name, node.middle)
+            if node.right is not None:
+                add_node_edge(G, color_map, node_name, node.right)
+        
+        # Make the graph
+        G = nx.DiGraph()
+        color_map = []
+        add_node_edge(G, color_map, None, self.root)
+        name_root = self.root.info
+
+        # Generate the node positions
+        pos = hierarchy_pos(G, root=self.root.info, leaf_vs_root_factor=1)
+        new_pos = {k:v for k,v in pos.items() if str(k)[0] != 'N'}
+        k = G.subgraph(new_pos.keys())
+
+        nx.draw(k, pos=new_pos, with_labels=True, node_size=1000)
+
+        # Set the plot settings
+        x, y = zip(*pos.values())
+        x_min, x_max = min(x), max(x)
+        plt.xlim(1.015*x_min-0.015*x_max, 1.015*x_max-0.015*x_min)
+        plt.ylim(min(y)-0.08, max(y)+0.08)
+        plt.show()
+
+############ CODE BLOCK 35 ################
+    def search(self, value):
+        """
+        This method search for a node with the value "value".
+        If the node is not found it returns None.
+
+        :param value: The value that is search for.
+        :type value: int
+        :return: This returns the node
+        :rtype: Node
+        """
+        if self.root is None:
+            return None
+        return self._step(self.root, value)
+        
+    @staticmethod
+    def _step(current_node, value):
+        """
+        This is a recursive helper method for "search".
+        This makes it possible to do the exhaustive search.
+        
+        :param value: The value that is search for.
+        :type value: int
+        :param current_node: The current node in the Ternary tree.
+        :type current_node: Node
+        :return: This returns the node
+        :rtype: Node
+        """
+        if current_node.info == value:
+            return current_node
+        if current_node.left is not None:
+            result = TernaryTree._step(current_node.left, value)
+            if result is not None:
+                return result
+        if current_node.middle is not None:
+            result = TernaryTree._step(current_node.middle, value)
+            if result is not None:
+                return result
+        if current_node.right is not None:
+            result = TernaryTree._step(current_node.right, value)
+            if result is not None:
+                return result
+        return None
+    
+
+############ CODE BLOCK 40 ################
+class CompleteGraph():
+    def __init__(self, size=5):
+        """
+        This initializes a complete graph with a certain size.
+        The internal representation is an adjacency matrix.
+
+        :param size: The size of the graph, i.e., the number of nodes.
+        :type size: int
+        """
+        self.adjacency_matrix = np.zeros((size, size))
+        for i in range(size):
+            for j in range(i):
+                self.adjacency_matrix[i, j] = self.adjacency_matrix[j, i] = RNG.integers(1, 10)
+
+    def __getitem__(self, index):
+        """
+        This makes the graph indexable as if you are directly indexing "self.adjacency_matrix"
+        """
+        return self.adjacency_matrix[index]
+
+    def __repr__(self):
+        return repr(self.adjacency_matrix)
+            
+    def show(self):
+        """
+        This method shows the current graph.
+        """
+        graph = nx.from_numpy_array(self.adjacency_matrix, create_using=nx.DiGraph)
+        pos = nx.shell_layout(graph)
+        edge_labels = nx.get_edge_attributes(graph, "weight")
+        nx.draw_networkx(graph, 
+                         pos,
+                         with_labels=True,
+                         node_size=400,
+                         width=2,
+                         arrowsize=15)
+        nx.draw_networkx_edge_labels(graph, pos, edge_labels, label_pos=0.15, font_size=10)
+        plt.show()
+
+def find_shortest_circuit(graph):
+    """
+    This function finds the shortest Hamiltonian circuit in a graph and
+    returns the path and the length of this path.
+
+    :param graph: The graph
+    :type graph: CompleteGraph
+    :return: The shortest circuit and its cost
+    :rtype: tuple[tuple[int], int]
+    """
+    # Define a helper function to generate all possible permutations of nodes
+    def generate_permutations(nodes):
+        if len(nodes) <= 1:
+            yield nodes
+        else:
+            for i in range(len(nodes)):
+                for perm in generate_permutations(nodes[:i] + nodes[i+1:]):
+                    yield (nodes[i],) + tuple(perm)
+
+    min_cost = float('inf')
+    shortest_circuit = None
+
+    # Generate all possible Hamiltonian circuits
+    for perm in generate_permutations(list(range(len(graph.adjacency_matrix)))):
+        # Ensure that the circuit is closed
+        perm += (perm[0],)
+        cost = length_of_circuit(graph, perm)
+        if cost < min_cost:
+            min_cost = cost
+            shortest_circuit = perm
+
+    return shortest_circuit, min_cost
+
+
+def length_of_circuit(graph, cycle):
+    """
+    This is a helper function to calculate the length of one circuit.
+
+    :param graph: The graph which the cycle traverses
+    :type graph: CompleteGraph
+    :param cycle: The cycle that encodes the circuit. 
+                  This should be just a list of nodes.
+    :type cycle: list[int]
+    :return: The length of this circuit
+    :rtype: int
+    """
+    # Sum up the weights of the edges in the cycle
+    total_length = sum(graph.adjacency_matrix[cycle[i], cycle[i + 1]] for i in range(len(cycle) - 1))
+    return total_length
+
 
 ############ END OF CODE BLOCKS, START SCRIPT BELOW! ################
