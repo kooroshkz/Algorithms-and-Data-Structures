@@ -318,7 +318,7 @@ class SolveFastestPath():
                 if node == destination:
                     return path, self.calculate_path_cost(path)
                 # Enqueue all adjacent nodes
-                for next_node, _ in node.next_nodes:
+                for next_node, weight in node.next_nodes:
                     queue.append((next_node, path + [next_node]))
         # If no path is found
         return None, float('inf')
