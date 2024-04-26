@@ -48,13 +48,9 @@ class FibonacciBottomUp():
         :return: fibo(n)
         :rtype: int
         """
-        if n in self.fibo_numbers:
-            return self.fibo_numbers[n]
+        self.step(n)
+        return self.result
         
-        for i in range(2, n+1):
-            self.fibo_numbers[i] = self.fibo_numbers[i-1] + self.fibo_numbers[i-2]
-        return self.fibo_numbers[n]
-            
     def step(self, n):
         """
         This calculates recursively the nth Fibonacci number.
@@ -64,7 +60,13 @@ class FibonacciBottomUp():
         :return: fibo(n)
         :rtype: int
         """
-        return self(n)
+        if n <= 1:
+            self.result = n
+        else:
+            fib = [0, 1]
+            for i in range(2, n + 1):
+                fib.append(fib[-1] + fib[-2])
+            self.result = fib[-1]
 
 ############ CODE BLOCK 120 ################
 
