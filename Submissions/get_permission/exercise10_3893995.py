@@ -96,19 +96,17 @@ class CoinChange():
         :return: A list with all possible ways to give change. The change consists of a list of coins.
         :rtype: list[list[int]]
         """
-        if (amount, max_coin_id) in self.coin_change:
-            return self.coin_change[(amount, max_coin_id)]
-        else:
-            change = []
-            for i in range(max_coin_id, -1, -1):
-                coin = CoinChange.coins[i]
-                if amount == coin:
-                    change.append([coin])
-                elif amount > coin:
-                    for c in self.step(amount-coin, i):
-                        change.append([coin] + c)
-            self.coin_change[(amount, max_coin_id)] = change
-            return change
+        if amount == 0:
+            return [[]]  
+        if amount < 0 or max_coin_id < 0:
+            return [] 
+
+        if (amount, max_coin_id) not in self.coin_change:
+            with_coin = [[CoinChange.coins[max_coin_id]] + change for change in self.step(amount - CoinChange.coins[max_coin_id], max_coin_id)]
+            without_coin = self.step(amount, max_coin_id - 1)
+            self.coin_change[(amount, max_coin_id)] = with_coin + without_coin
+
+        return self.coin_change[(amount, max_coin_id)]
 
 ############ CODE BLOCK 300 ################
 
