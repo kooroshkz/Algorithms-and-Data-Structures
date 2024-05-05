@@ -22,7 +22,7 @@ def distance(pointA, pointB):
     :return: The distance between the two points
     :rtype: float
     """
-    return np.linalg.norm(np.array(pointA) - np.array(pointB))
+    return float((pointA[0] - pointB[0])**2 + (pointA[1] - pointB[1])**2)**0.5
 
 def nearest_neighbour(data, point):
     """
@@ -35,7 +35,14 @@ def nearest_neighbour(data, point):
     :return: The nearest neighbour and the distance to that neighbour.
     :rtype: tuple[np.ndarray[(2,), float], float]
     """
-    return min([(neighbour, distance(neighbour, point)) for neighbour in data if not np.array_equal(neighbour, point)], key=lambda x: x[1])
+    min_distance = float('inf')
+    closest_point = None
+    for candidate in data:
+        if distance(point, candidate) < min_distance:
+            min_distance = distance(point, candidate)
+            closest_point = candidate
+    
+    return (closest_point, min_distance)
 
 ############ CODE BLOCK 15 ################
 def classify_point(data, point):
@@ -50,7 +57,17 @@ def classify_point(data, point):
     :return: The nearest group and the nearest neighbour.
     :rtype: tuple[int, np.ndarray[(Any, 2), float]]
     """
-    return min([(i, nearest_neighbour(group, point)) for i, group in enumerate(data)], key=lambda x: x[1][1])
+    min_distance = float('inf')
+    closest_group = None
+    closest_point = None
+    for index, group in enumerate(data):
+        candidate, distance = nearest_neighbour(group, point)
+        if distance < min_distance:
+            min_distance = distance
+            closest_group = index
+            closest_point = candidate
+    
+    return (closest_group, closest_point)
 
 ############ CODE BLOCK 20 ################
 class Ring():
@@ -169,6 +186,7 @@ class SolveDoorRingPuzzle():
         :type door: DoorRingPuzzle
         """
         self.door = door
+        self.step(0)
     
     def step(self, ring):
         """
@@ -181,9 +199,16 @@ class SolveDoorRingPuzzle():
         """
         if ring == len(self.door):
             return self.door.open_door()
-        if self.door.turn_ring(ring):
-            return self.step(ring + 1)
-        return self.step(ring)
+                
+        
+        if self.next_step(ring):
+            return True
+
+        while not self.door.turn_ring(ring):
+            if self.next_step(ring):
+                return True
+
+        return False
             
     def next_step(self, ring):
         """
@@ -194,7 +219,7 @@ class SolveDoorRingPuzzle():
         :return: This method returns what self.step returns
         :type: boolean
         """
-        return self.step(ring)
+        return self.step(ring + 1)
 
 ############ CODE BLOCK 30 ################
 class Node():
@@ -240,10 +265,31 @@ class TernaryTree():
         :param value: The value that is added to the tree
         :type value: int       
         """
+        current_pos = self.root
         if self.root is None:
             self.root = Node(value)
-        else:
-            self.__add(value, self.root)  
+            return
+        while True:
+            direction = np.random.choice((0, 1, 2))
+            match direction:
+                case 0:
+                    if current_pos.left is not None:
+                        current_pos = current_pos.left
+                    else:
+                        current_pos.left = Node(value)
+                        return
+                case 1:
+                    if current_pos.middle is not None:
+                        current_pos = current_pos.middle
+                    else:
+                        current_pos.middle = Node(value)
+                        return
+                case 2:
+                    if current_pos.right is not None:
+                        current_pos = current_pos.right
+                    else:
+                        current_pos.right = Node(value)
+                        return
 
     def show(self):
         """
@@ -324,21 +370,18 @@ class TernaryTree():
         :return: This returns the node
         :rtype: Node
         """
-        if current_node.info == value:
-            return current_node
-        if current_node.left is not None:
-            result = TernaryTree._step(current_node.left, value)
-            if result is not None:
-                return result
-        if current_node.middle is not None:
-            result = TernaryTree._step(current_node.middle, value)
-            if result is not None:
-                return result
-        if current_node.right is not None:
-            result = TernaryTree._step(current_node.right, value)
-            if result is not None:
-                return result
-        return None
+        if current_node:
+            if current_node.info == value:
+                return current_node
+            left = TernaryTree._step(current_node.left, value)
+            middle = TernaryTree._step(current_node.middle, value)
+            right = TernaryTree._step(current_node.right, value)
+            if left:
+                return left
+            if middle:
+                return middle
+            if right:
+                return right
     
 
 ############ CODE BLOCK 40 ################
