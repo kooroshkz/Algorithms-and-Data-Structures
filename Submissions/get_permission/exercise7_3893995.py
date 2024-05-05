@@ -36,10 +36,12 @@ class MergeSort():
         """
         if len(list_) <= 1:
             return list_
-        mid = len(list_) // 2
-        left = self.step(list_[:mid])
-        right = self.step(list_[mid:])
-        return self.merge(left, right)
+        
+        middle = len(list_) // 2
+        left = list_[:middle]
+        right = list_[middle:]
+
+        return self.merge(self.step(left), self.step(right))
 
     @staticmethod
     def merge(list1, list2):
@@ -107,7 +109,9 @@ class BinarySearch():
         """
         self.list = list_
         self.value = value
-        return self.step(0, len(list_))
+        if self.value not in self.list:
+            return None
+        return self.step(0, len(list_) - 1)
     
     def step(self, min_index, max_index):
         """
@@ -122,14 +126,20 @@ class BinarySearch():
         :return: index of the found value.
         :rtype: int
         """
-        if min_index >= max_index:
-            return None
-        mid = (min_index + max_index) // 2
-        if self.list[mid] == self.value:
-            return mid
-        if self.list[mid] < self.value:
-            return self.step(mid + 1, max_index)
-        return self.step(min_index, mid)
+        middle = (min_index + max_index) // 2
+        if self.list[min_index] == self.value:
+            return min_index
+            
+        elif self.list[max_index] == self.value:
+            return max_index
+
+        if self.list[middle] == self.value:
+            return middle
+        
+        if self.list[middle] < self.value:
+            return self.step(middle, max_index)
+        else:
+            return self.step(min_index, middle)
 
 ############ CODE BLOCK 40 ################
 def gcd(a, b):
