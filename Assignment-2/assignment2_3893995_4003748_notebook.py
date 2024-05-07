@@ -624,5 +624,31 @@ def coordinate_to_node(map_, graph, coordinate):
                 break
     return closest_nodes
 
+############ CODE BLOCK 220 ################
+
+def create_country_graphs(map_):
+    """
+    This function returns a list of all graphs of a country map, where the first graph is the highways and de rest are the cities.
+
+    :param map_: The country map
+    :type map_: Map
+    :return: A list of graphs
+    :rtype: list[Graph]
+    """
+    graphs = []
+    # Create graph for highways
+    highway_graph = Graph(map_, start=(0, 0))
+    graphs.append(highway_graph)
+
+    # Create graphs for cities
+    city_map = copy.deepcopy(map_)
+    city_map[city_map == 1] = 0  # Remove highways
+    city_map[city_map == 2] = 1  # Set cities as roads
+    while np.any(city_map == 1):
+        city_graph = Graph(city_map, start=city_graph.get_random_node())
+        graphs.append(city_graph)
+
+    return graphs
+
 
 ############ END OF CODE BLOCKS, START SCRIPT BELOW! ################
