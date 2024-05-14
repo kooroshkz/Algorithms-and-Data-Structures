@@ -598,6 +598,23 @@ class BFSSolverFastestPath(BFSSolverShortestPath):
 
         return total_time
 
+    def main_loop(self):
+        """
+        This method contains the logic of the flood-fill algorithm for the shortest path problem.
+        It does not have any inputs nor outputs. 
+        Hint, use object attributes to store results.
+        """
+        while self.priorityqueue:
+            current, current_distance = self.priorityqueue.pop(0)
+            if self.base_case(current):
+                return
+            for new_node in self.next_step(current):
+                if new_node[0] < 0 or new_node[0] >= self.graph.map.shape[0] or new_node[1] < 0 or new_node[1] >= self.graph.map.shape[1]:
+                    print(f"Skipping out-of-bounds node: {new_node}")
+                    continue
+                current_distance = np.sqrt((current[0] - new_node[0])**2 + (current[1] - new_node[1])**2)
+                self.step(current, new_node, current_distance, self.graph.map[new_node[0]][new_node[1]])
+
 ############ CODE BLOCK 210 ################
 
 def coordinate_to_node(map_, graph, coordinate):
@@ -626,16 +643,20 @@ def coordinate_to_node(map_, graph, coordinate):
             continue
         if not graph.map[new_height][new_width]:
             continue
-        closest_nodes.append(find_node_in_direction(graph, (new_height, new_width), direction))
+        node = find_node_in_direction(graph, (new_height, new_width), direction)
+        if node:
+            closest_nodes.append(node)
     return closest_nodes
 
-# added this helper function
 def find_node_in_direction(graph, node, direction):
     current = node
     while True:
         if current in graph.adjacency_list:
             return current
         current = (current[0] + direction[0], current[1] + direction[1])
+        if current[0] < 0 or current[0] >= graph.map.shape[0] or current[1] < 0 or current[1] >= graph.map.shape[1]:
+            break  # Prevent out-of-bounds access
+    return None
 
 ############ CODE BLOCK 220 ################
 
@@ -665,6 +686,258 @@ def create_country_graphs(map_):
         graphs.append(city_graph)
 
     return graphs
+
+############ CODE BLOCK 230 ################
+
+class BFSSolverMultipleFastestPaths(BFSSolverFastestPath):
+    """
+    A class instance should at least contain the following attributes after being called:
+        :param priorityqueue: A priority queue that contains all the nodes that need to be visited including the time it takes to reach these nodes.
+        :type priorityqueue: list[tuple[tuple[int], float]]
+        :param history: A dictionary containing the nodes that are visited and as values the node that leads to this node including the time it takes from the start node.
+        :type history: dict[tuple[int], tuple[tuple[int], float]]
+        :param found_destinations: The destinations already found with Dijkstra.
+        :type found_destinations: list[tuple[int]]
+    """
+    def __init__(self, find_at_most=3):
+        """
+        This init makes it possible to make a different Dijkstra algorithm 
+        that find more or less destination nodes before it stops searching.
+
+        :param find_at_most: The number of found destination nodes before the algorithm stops
+        :type find_at_most: int
+        """
+        self.find_at_most = find_at_most
+    
+    def __call__(self, graph, sources, destinations, vehicle_speed):      
+        """
+        This method gives the top three fastest routes through the grid from any of the sources to any of the destinations.
+        You start at the sources and the algorithm ends if you reach enough destinations, both nodes should be included in the path.
+        A route consists of a list of nodes (which are coordinates).
+
+        :param graph: The graph that represents the map.
+        :type graph: Graph
+        :param sources: The nodes where the path starts and the time it took to get here.
+        :type sources: list[tuple[tuple[int], float]]
+        :param destinations: The nodes where the path ends and the time it took to get here.
+        :type destinations: list[tuple[tuple[int], float]]
+        :param vehicle_speed: The maximum speed of the vehicle.
+        :type vehicle_speed: float
+        :return: A list of the n fastest paths and time they take, sorted from fastest to slowest 
+        :rtype: list[tuple[path, float]], where path is a fictional data type consisting of a list[tuple[int]]
+        """       
+        self.priorityqueue = sorted(sources, key=lambda x:x[1])
+        self.history = {s: (None, t) for s, t in sources}
+        
+        self.destinations = [dest[0] for dest in destinations]
+        self.found_destinations = []
+        self.graph = graph
+        self.sources = sources
+        self.vehicle_speed = vehicle_speed
+        self.main_loop()
+        return self.find_n_paths()
+
+
+    def find_n_paths(self):
+        """
+        This method needs to find the top `n` fastest paths between any source node and any destination node.
+        This does not mean that each source node has to be in a path nor that each destination node needs to be in a path.
+
+        Hint1: The fastest path is stored in each node by linking to the previous node. 
+               Therefore, if you start searching from a destination node,
+               you always find the optimal path from that destination node.
+               This is similar if you only had one destination node.         
+
+        :return: A list of the n fastest paths and time they take, sorted from fastest to slowest 
+        :rtype: list[tuple[path, float]], where path is a fictional data type consisting of a list[tuple[int]]
+        """
+        paths = []
+        for destination in self.found_destinations:
+            current = destination
+            path = []
+            time = self.history[current][1]
+            while current:
+                path.append(current)
+                new = self.history[current][0]
+                current = new
+            paths.append((path, time))
+        
+        return sorted(paths, key=lambda x: x[1])[:self.find_at_most]
+            
+        
+    def base_case(self, node):
+        """
+        This method checks if the base case is reached and
+        updates self.found_destinations
+
+        :param node: The current node
+        :type node: tuple[int]
+        :return: Returns True if the base case is reached.
+        :rtype: bool
+        """
+        if node in self.destinations:
+            self.found_destinations.append(node)
+            
+        if len(self.found_destinations) == len(self.destinations):
+            return True
+        return False
+
+############ CODE BLOCK 235 ################
+
+class BFSSolverFastestPathMD(BFSSolverFastestPath):
+    def __call__(self, graph, source, destinations, vehicle_speed):      
+        """
+        This method is functionally no different than the call method of BFSSolverFastestPath
+        except for what `destination` is.
+
+        See for an explanation of all arguments `BFSSolverFastestPath`.
+        
+        :param destinations: The nodes where the path ends.
+        :type destinations: list[tuple[int]]
+        """
+        self.priorityqueue = [(source, 0)]
+        self.history = {source: (None, 0)}
+        self.destinations = destinations
+        self.destination = None
+        self.vehicle_speed = vehicle_speed
+
+        raise NotImplementedError("Please complete this method")       
+
+    def base_case(self, node):
+        """
+        This method checks if the base case is reached.
+
+        :param node: The current node
+        :type node: tuple[int]
+        :return: returns True if the base case is reached.
+        :rtype: bool
+        """
+        raise NotImplementedError("Please complete this method")
+
+############ CODE BLOCK 300 ################
+
+def path_length(coordinate, closest_nodes, map_, vehicle_speed):
+    return [(node, (abs(node[0] - coordinate[0]) + abs(node[1] - coordinate[1])) / min(vehicle_speed, map_[coordinate])) for node in closest_nodes]
+
+def get_city_index(map_, coordinate):
+    """
+    Get the index of the city that contains the given coordinate.
+    :param coordinate: The coordinate to check
+    :type coordinate: tuple[int]
+    :return: The index of the city
+    :rtype: int
+    """
+    for index, (corner_x, corner_y) in enumerate(map_.city_corners):
+        city_grid = map_.city_grids[index]
+        if (corner_x <= coordinate[0] < corner_x + city_grid.shape[0] and
+                corner_y <= coordinate[1] < corner_y + city_grid.shape[1]):
+            return index
+    return -1  # If the coordinate is not within any city
+
+def find_path(coordinate_A, coordinate_B, map_, vehicle_speed, find_at_most=3):
+    """
+    Find the optimal path according to the divide and conquer strategy from coordinate A to coordinate B.
+
+    See hints and rules above on how to do this.
+
+    :param coordinate_A: The start coordinate
+    :type coordinate_A: tuple[int]
+    :param coordinate_B: The end coordinate
+    :type coordinate_B: tuple[int]
+    :param map_: The map on which the path needs to be found
+    :type map_: Map
+    :param vehicle_speed: The maximum vehicle speed
+    :type vehicle_speed: float
+    :param find_at_most: The number of routes to find for each path finding algorithm, defaults to 3.
+                         Note, that this is only needed if you did 2.3.
+    :type find_at_most: int, optional
+    :return: The path between coordinate_A and coordinate_B. Also, return the cost.
+    :rtype: list[tuple[int]], float
+    """
+    graphs = create_country_graphs(map_)
+
+    # Step 2: Determine the closest nodes to the starting and ending coordinates
+    city_graphs = graphs[1:]  # First graph is the highway graph
+    city_A_index = get_city_index(map_, coordinate_A)
+    city_B_index = get_city_index(map_, coordinate_B)
+
+    if city_A_index == -1 or city_B_index == -1:
+        raise ValueError("Coordinates must be within cities")
+
+    closest_nodes_A = coordinate_to_node(map_, city_graphs[city_A_index], coordinate_A)
+    closest_nodes_B = coordinate_to_node(map_, city_graphs[city_B_index], coordinate_B)
+
+    print(f"City A index: {city_A_index}, Closest nodes A: {closest_nodes_A}")
+    print(f"City B index: {city_B_index}, Closest nodes B: {closest_nodes_B}")
+
+    # Validate closest nodes
+    for node in closest_nodes_A + closest_nodes_B:
+        if node not in city_graphs[city_A_index].adjacency_list and node not in city_graphs[city_B_index].adjacency_list:
+            print(f"Node {node} is not in the graph adjacency list")
+            raise ValueError(f"Node {node} is not in the graph adjacency list")
+
+    # Step 3: Check if the coordinates are in the same city
+    if city_A_index == city_B_index:
+        # Use the city graph
+        solver = BFSSolverFastestPath()
+        path, time = solver(city_graphs[city_A_index], closest_nodes_A[0], closest_nodes_B[0], vehicle_speed)
+    else:
+        # Use the highway graph
+        solver = BFSSolverMultipleFastestPaths(find_at_most=find_at_most)
+        all_city_exits = map_.get_all_city_exits()
+        
+        # Validate all_city_exits
+        valid_city_exits = [(node, 0) for node in all_city_exits if node in graphs[0].adjacency_list]
+        if not valid_city_exits:
+            raise ValueError("No valid city exits found in the highway graph adjacency list")
+        
+        paths_from_A_to_highway = solver(graphs[0], [(node, 0) for node in closest_nodes_A], valid_city_exits, vehicle_speed)
+        paths_from_highway_to_B = solver(graphs[0], valid_city_exits, [(node, 0) for node in closest_nodes_B], vehicle_speed)
+        
+        print(f"Paths from A to highway: {paths_from_A_to_highway}")
+        print(f"Paths from highway to B: {paths_from_highway_to_B}")
+
+        # Combine the paths to find the fastest route
+        fastest_path = None
+        fastest_time = float('inf')
+        
+        for path_A, time_A in paths_from_A_to_highway:
+            for path_B, time_B in paths_from_highway_to_B:
+                if path_A[-1] == path_B[0]:  # Check if the paths can be connected
+                    total_time = time_A + time_B
+                    if total_time < fastest_time:
+                        fastest_time = total_time
+                        fastest_path = path_A + path_B[1:]
+
+        if fastest_path is None:
+            raise ValueError("No valid path found between the cities.")
+
+    # Combine the final path from A to B
+    final_path, final_time = None, float('inf')
+
+    if city_A_index == city_B_index:
+        final_path = path
+        final_time = time
+    else:
+        for node_A in closest_nodes_A:
+            for node_B in closest_nodes_B:
+                if node_A not in city_graphs[city_A_index].adjacency_list or node_B not in city_graphs[city_B_index].adjacency_list:
+                    continue  # Skip invalid nodes
+                path_to_A, time_to_A = BFSSolverFastestPath()(city_graphs[city_A_index], coordinate_A, node_A, vehicle_speed)
+                path_to_B, time_to_B = BFSSolverFastestPath()(city_graphs[city_B_index], node_B, coordinate_B, vehicle_speed)
+                
+                if path_to_A and path_to_B:
+                    total_path = path_to_A + fastest_path + path_to_B[1:]
+                    total_time = time_to_A + fastest_time + time_to_B
+                    
+                    if total_time < final_time:
+                        final_time = total_time
+                        final_path = total_path
+
+    if final_path is None:
+        raise ValueError("No valid final path found between the coordinates.")
+
+    return final_path, final_time
 
 
 ############ END OF CODE BLOCKS, START SCRIPT BELOW! ################
