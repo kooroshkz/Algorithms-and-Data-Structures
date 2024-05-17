@@ -21,8 +21,15 @@ def alternating_disks(n):
     :rtpye: np.ndarray[(2*n), int]
     """
     disks = np.array(list(zip(np.ones(n), np.zeros(n)))).flatten()
+    i = 0
+    while 1 in disks[n:] and i < 2 * n - 2:
+        if disks[i] != disks[i + 1] and disks[i] == 0:
+            swap(disks, i)
+        i += 1
+        if i == 2 * n - 2:
+            i = 0
     return disks
-
+    
 def swap(disks, i):
     """
     This function swaps the disks i and i+1 in the array disks.
@@ -33,7 +40,7 @@ def swap(disks, i):
     :param i: Position of the disk that needs to be swapped
     :type i: int
     """
-    pass
+    disks[i], disks[i + 1] = disks[i + 1], disks[i]
 
 ############ CODE BLOCK 20 ################
 class Permutations():
@@ -116,13 +123,16 @@ class PermutationsWithReplacement():
         """
         if i == len(self.list):
             return [[]]
-
-        all_permutations = []
-        for elem in self.list:
-            next_permutations = self.next_step(i)
-            for perm in next_permutations:
-                all_permutations.append([elem] + perm)
-        return all_permutations
+        
+        
+        permutations = []
+        for index in range(len(self.list)):
+            # call the next step to generate available actions
+            for action in self.next_step(i):
+                action.append(self.list[index])
+                permutations.append(action)
+                
+        return permutations
 
     def next_step(self, i):
         """
@@ -178,12 +188,15 @@ class ManhattanProblem():
         :return: All possible route with this position as starting point.
         :rtype: list[list[tuple[int]]]
         """
-        routes = []
+        if pos == (len(self.grid) - 1, len(self.grid[0]) - 1):
+            return [[pos]]
+        
+        paths = []
         for action in actions:
-            new_pos = (pos[0] + action[0], pos[1] + action[1])
-            if 0 <= new_pos[0] < len(self.grid) and 0 <= new_pos[1] < len(self.grid[0]):
-                routes.extend(self.next_step(new_pos))
-        return routes
+            for path in self.next_step(action):
+                paths.append([pos] + path)
+        
+        return paths
 
     def next_step(self, pos):
         """
@@ -195,10 +208,14 @@ class ManhattanProblem():
         :return: This method returns what self.step returns
         :rtype: list[list[tuple[int]]]
         """
-        actions = [(1, 0), (0, 1)]  # Right, Down
-        if pos == (len(self.grid) - 1, len(self.grid[0]) - 1):  # Reached bottom right corner
-            return [[pos]]
-        return self.step(pos, actions)
+        pos_candidates = []
+        grid = self.grid
+        if pos[0] + 1 < len(grid) and grid[pos[0] + 1][pos[1]] == 1:
+            pos_candidates.append((pos[0] + 1, pos[1]))
+        if pos[1] + 1 < len(grid[0]) and grid[pos[0]][pos[1] + 1] == 1:
+            pos_candidates.append((pos[0], pos[1] + 1))
+        
+        return self.step(pos, pos_candidates)
 
 ############ CODE BLOCK 32 ################
 class Node():
@@ -326,11 +343,13 @@ class ManhattanProblemBreadth():
         :return: A list with all possible routes, where a route consists of a list of coordinates.
         :rtype: list[list[tuple[int]]]
         """
-        self.queue = deque([road_graph])  # propper datastructure, however, a list would work as well
+        self.queue = deque([road_graph])
         self.history = {road_graph: {(road_graph.info,)}}
-        
+        self.final_node = None
         self.main_loop()
-        return [list(route) for route in self.history[road_graph]]
+        output_list = sorted(list(self.history[self.final_node]))
+        new_list = [list(path) for path in output_list]
+        return new_list
 
     def main_loop(self):
         """
@@ -340,11 +359,11 @@ class ManhattanProblemBreadth():
         Hint, use object attributes to store results.
         """
         while self.queue:
-            node = self.queue.popleft()
-            if self.base_case(node):
-                continue
-            for new_node in self.next_step(node):
-                self.step(node, new_node)
+            current_node = self.queue.popleft()
+            if self.base_case(current_node):
+                 continue
+            for sub_node in self.next_step(current_node):
+                self.step(current_node, sub_node)
 
     def base_case(self, node):
         """
@@ -353,7 +372,8 @@ class ManhattanProblemBreadth():
         :param node: The current node
         :type node: Node
         """
-        if node.info == (len(road_grid) - 1, len(road_grid[0]) - 1):
+        if not node.edges:
+            self.final_node = node
             return True
         return False
 
@@ -367,7 +387,7 @@ class ManhattanProblemBreadth():
         :param new_node: The next node that can be visited from the current node
         :type new_node: Node        
         """
-        if new_node not in self.history:
+        if node not in self.queue:
             self.queue.append(new_node)
             self.update_history(node, new_node)
         
@@ -380,7 +400,7 @@ class ManhattanProblemBreadth():
         :return: A list with possible next nodes that can be visited from the current node.
         :rtype: list[Node]  
         """
-        return [edge.destination for edge in node.edges]
+        return node.edges
         
     def update_history(self, node, new_node):
         """
@@ -392,10 +412,321 @@ class ManhattanProblemBreadth():
         :param new_node: The next node that can be visited from the current node
         :type new_node: Node    
         """
-        new_routes = set()
-        for route in self.history[node]:
-            new_routes.add(route + (new_node.info,))
-        self.history[new_node] = new_routes
+        if new_node not in self.history.keys():
+            self.history[new_node] = set()
+        for path in self.history[node]: 
+            self.history[new_node].add(path + (new_node.info,))
+
+############ CODE BLOCK 40 ################
+class TowerOfHanoiFast():
+    def __call__(self, n):
+        """
+        This method solves the tower of Hanoi according to the fast algorithm.
+        The output should be a list containing all the moves to solve the problem.
+        A move is a tuple with two integers containing from which rod to which rod.
+        For example, move (0,2) is place the top disk of rod 0 onto rod 2.
+        Also, the attribute towers should contain the end solution where all disks are 
+        in the correct order on rod 2.
+
+        This class instance should at least contain the following attributes after being called:
+            :param tower: A tuple with the tree rods each rod is represented by a list 
+                          with integers where the integer is the size of the disk.
+            :type tower: tuple[list[int]]
+
+        Hint 1: It might be easier to first generate the moves and then apply them to the towers.
+        Hint 2: The argument "n" is not needed for the algorithm but can help. 
+                It is however needed if you do hint 1.
+
+        :param n: This is the height of the tower, i.e., the number of disks.
+        :type n: int
+        :return: A list containing all the moves to solve the tower of Hanoi with n disks.
+        :rtype: list[tuple[int]]
+        """
+        self.towers = (list(range(n, 0, -1)), [], [])
+
+        self.towers = (list(range(n, 0, -1)), [], [])
+        self.moves = []
+
+        def move_disk(source, dest):
+            disk = self.towers[source].pop()
+            self.towers[dest].append(disk)
+            self.moves.append((source, dest))
+
+        def hanoi(n, source, aux, dest):
+            if n == 1:
+                move_disk(source, dest)
+            else:
+                hanoi(n - 1, source, dest, aux)
+                move_disk(source, dest)
+                hanoi(n - 1, aux, source, dest)
+
+        hanoi(n, 0, 1, 2)
+        return self.moves
+
+    def step(self, source, aux, dest, n=0):
+        """
+        This method can be used as the recursive part of the algorithm
+
+        :param source: The rod that has the current (sub)tower that needs to be moved.
+        :type source: int
+        :param aux: The auxiliary rod that can be used to transfer all disks to the destination rod.
+        :type aux: int
+        :param dest: The destination rod where the (sub)tower needs to go.
+        :type dest: int
+        :param n: The height of the current tower that is moved, default to 0.
+        :type n: int, optional
+        """
+        pass
+
+############ CODE BLOCK 44 ################
+class TowerOfHanoiDepth():
+    # All possible actions for any tower of Hanoi State-space
+    possible_actions = [(0, 1), 
+                        (0, 2), 
+                        (1, 2), 
+                        (2, 1), 
+                        (1, 0), 
+                        (2, 0)] 
+
+    def __call__(self, n):
+        """
+        This method uses depth-first search to find a solution to solve the tower of Hanoi.
+        The output should be a list containing all the moves to solve the problem.
+        A move is a tuple with two integers containing from which rod to which rod.
+        For example, move (0,2) is place the top disk of rod 0 onto rod 2.
+        Also, the attribute towers should contain the end solution where all disks are 
+        in the correct order on rod 2.
+
+        This class instance should at least contain the following attributes after being called:
+            :param tower: A tuple with the tree rods each rod is represented by a list 
+                          with integers where the integer is the size of the disk.
+            :type tower: tuple[list[int]]
+            :param moves: A list with all the moves to solve the problem
+            :typem moves: list[tuple[int]]
+            :param history: A set containing all states that are already visited.
+            :type history: set[tuple[tuple[int]]]
+
+        :param n: This is the height of the tower, i.e., the number of disks.
+        :type n: int
+        :return: A list containing all the moves to solve the tower of Hanoi with n disks.
+        :rtype: list[tuple[int]]
+        """
+        self.moves = []  # a list to store the moves
+        self.towers = (list(range(n, 0, -1)), [], [])
+        self.history = {self.to_hashable_state(self.towers)}
+        self.next_step()  # we first need the know which the next actions can be before we can take a step
+        return self.moves
+
+    @staticmethod
+    def to_hashable_state(state):
+        """
+        This method makes a state into a hashable object.
+        
+        As we have seen last week sets can quickly find objects.
+        However, to do this these objects must be hashable.
+        A simple rule to know if a type is hashable is to ask if it is immutable,
+        if not then often it is also not hashable because if you change the value
+        the output of the hash function would also change.
+
+        :param state: A current state of the tower of Hanoi problem, i.e., the current rod disk configuration.
+        :type state: tuple[list[int]]
+        :return: A state space that is hashable. In this case, also immutable.
+        :rtype: tuple[tuple[int]]
+        """
+        return tuple(tuple(rod) for rod in state)
+
+    def step(self, actions):
+        """
+        One step in the recursive depth-first search algorithm.
+
+        Hint1: Do not forget to check if state has already been visited and 
+               update the history as needed.
+        Hint2: You only need to find one path, so as long as the path is correct
+               you do not to explore any more possible actions.
+
+        :param actions: A set of correct actions that can taken from this state.
+        :type actions: list[tuple[int]]
+        :return: If the current step is correct or not
+        :rtype: boolean
+        """
+        if self.towers == ([], [], list(range(len(self.towers[0]), 0, -1))):
+            return True
+        for action in actions:
+            if self.do_move(action):
+                if self.to_hashable_state(self.towers) not in self.history:
+                    self.history.add(self.to_hashable_state(self.towers))
+                    self.moves.append(action)
+                    if self.step(self.next_step()):
+                        return True
+                    self.clean_up(action)
+                    self.moves.pop()
+        return False
+    
+    def next_step(self):
+        """
+        This method helps us determine the next set of correct actions.
+        This set of correct actions should be a subset of the class attribute `possible_actions`.
+
+        :return: If the current step is correct or not
+        :rtype: boolean
+        """
+        actions = []
+        for move in self.possible_actions:
+            if self.towers[move[0]] and (not self.towers[move[1]] or self.towers[move[0]][-1] < self.towers[move[1]][-1]):
+                actions.append(move)
+        return actions
+
+    def do_move(self, action):
+        """
+        This is a helper method that does one move.
+        One move consists of changing one disk from one rod to another and
+        to save it the move.
+        
+        :param action: A correct action that is taken from this state.
+        :type action: tuple[int]
+        """
+        if self.towers[action[0]]:
+            disk = self.towers[action[0]].pop()
+            self.towers[action[1]].append(disk)
+            return True
+        return False
+
+    def clean_up(self, action):
+        """
+        Clean up the previous move, if the current action taken does not lead to a correct solution.
+        For example, you got stuck because there are no moves that go to a state that is not visited.
+
+        :param action: A correct action that is taken from this state.
+        :type action: tuple[int]
+        """
+        if self.towers[action[1]]:
+            disk = self.towers[action[1]].pop()
+            self.towers[action[0]].append(disk)
+
+############ CODE BLOCK 48 ################
+class TowerOfHanoiBreadth():   
+    # All possible actions for any tower of Hanoi State-space
+    possible_actions = [(0, 1), 
+                        (0, 2), 
+                        (1, 2), 
+                        (2, 1), 
+                        (1, 0), 
+                        (2, 0)] 
+
+    def __call__(self, n):      
+        """
+        This method uses breadth-first search to find a solution to solve the tower of Hanoi.
+        The output should be a list containing all the moves to solve the problem.
+        A move is a tuple with two integers containing from which rod to which rod.
+        For example, move (0,2) is place the top disk of rod 0 onto rod 2.
+        Also, the attribute towers should contain the end solution where all disks are 
+        in the correct order on rod 2.
+
+        This class instance should at least contain the following attributes after being called:
+            :param moves: A list with all the moves to solve the problem
+            :typem moves: list[tuple[int]]
+            :param history: A dictionary containing all states that are already visited as keys 
+                            and with the values the moves to get there.
+            :type history: dict[tuple[tuple[int]], list[tuple[int]]]
+
+        :param n: This is the height of the tower, i.e., the number of disks.
+        :type n: int
+        :return: A list containing all the moves to solve the tower of Hanoi with n disks.
+        :rtype: list[tuple[int]]
+        """
+        towers = (list(range(n, 0, -1)), [], [])
+        self.queue = deque([copy.deepcopy(towers)])  # proper datastructure, however, a list would work as well
+        self.history = {self.to_hashable_state(towers): []}
+        
+        self.main_loop()
+        return self.moves
+
+    def main_loop(self):
+        """
+        This method contains the logic of the breadth-first search for the towers of Hanoi problem.
+
+        It does not have any inputs nor outputs. 
+        Hint, use object attributes to store results.
+        """
+        while self.queue:
+            towers = self.queue.popleft()
+            if self.base_case(towers):
+                continue
+            for action in self.next_step(towers):
+                self.step(towers, action)
+
+    @staticmethod
+    def to_hashable_state(towers):
+        """
+        This method makes a state into a hashable object.
+        
+        As we have seen last week sets can quickly find objects.
+        However, to do this these objects must be hashable.
+        A simple rule to know if a type is hashable is to ask if it is immutable,
+        if not then often it is also not hashable because if you change the value
+        the output of the hash function would also change.
+
+        :param towers: A current state of the tower of Hanoi problem, i.e., the current rod disk configuration.
+        :type towers: tuple[list[int]]
+        :return: A state space that is hashable. In this case, also immutable.
+        :rtype: tuple[tuple[int]]
+        """
+        return tuple(tuple(rod) for rod in towers)
+    
+    def base_case(self, towers):
+        """
+        This method checks if the current state is the final state, where
+        all disks are on the last rod in the correct order.
+
+        :param tower: A tuple with the tree rods each rod is represented by a list 
+                      with integers where the integer is the size of the disk.
+        :type tower: tuple[list[int]]
+        """
+        if towers[2] == list(range(len(towers[2]), 0, -1)):
+            self.moves = self.history[self.to_hashable_state(towers)]
+            self.towers = towers
+            return True
+        return False
+
+    def step(self, towers, action):
+        """
+        One breadth-first search step.
+        Here, you add new states to the queue, and update the history.
+
+        Hint: To create a new state, you need to make a copy of the current towers and
+              then adjust them otherwise the towers for all states are adjusted.
+        
+        :param tower: A tuple with the tree rods each rod is represented by a list 
+                      with integers where the integer is the size of the disk.
+        :type tower: tuple[list[int]]
+        :param action: A correct action that is taken from this state.
+        :type action: tuple[int]
+        """
+        source, dest = action
+        disk = towers[source].pop()
+        towers[dest].append(disk)
+        self.queue.append(copy.deepcopy(towers))
+        self.history[self.to_hashable_state(towers)] = self.history[self.to_hashable_state(towers)] + [action]
+
+    def next_step(self, towers):
+        """
+        This method helps us determine the next set of correct actions.
+        This set of correct actions should be a subset of the class attribute `possible_actions`.
+        
+        :param tower: A tuple with the tree rods each rod is represented by a list 
+                      with integers where the integer is the size of the disk.
+        :type tower: tuple[list[int]]
+        :return: The list of possible next actions
+        :rtype: list[tuple[int]
+        """
+        actions = []
+        for action in self.possible_actions:
+            source, dest = action
+            if not towers[source]:
+                continue
+            if not towers[dest] or towers[dest][-1] > towers[source][-1]:
+                actions.append(action)
+        return actions
 
 
 ############ END OF CODE BLOCKS, START SCRIPT BELOW! ################
