@@ -48,9 +48,10 @@ class FibonacciBottomUp():
         :return: fibo(n)
         :rtype: int
         """
-        self.step(n)
-        return self.result
-        
+        for i in range(2, n+1):
+            self.fibo_numbers[i] = self.fibo_numbers[i-1] + self.fibo_numbers[i-2]
+        return self.fibo_numbers[n]
+            
     def step(self, n):
         """
         This calculates recursively the nth Fibonacci number.
@@ -60,13 +61,11 @@ class FibonacciBottomUp():
         :return: fibo(n)
         :rtype: int
         """
-        if n <= 1:
-            self.result = n
-        else:
-            fib = [0, 1]
-            for i in range(2, n + 1):
-                fib.append(fib[-1] + fib[-2])
-            self.result = fib[-1]
+        if n in self.fibo_numbers:
+            return self.fibo_numbers[n]
+            
+        self.fibo_numbers[n] = self.step(n-1) + self.step(n-2)
+        return self.fibo_numbers[n]
 
 ############ CODE BLOCK 120 ################
 
@@ -80,11 +79,7 @@ class FibonacciTopDown(FibonacciBottomUp):
         :return: fibo(n)
         :rtype: int
         """
-        if n in self.fibo_numbers:
-            return self.fibo_numbers[n]
-        
-        self.fibo_numbers[n] = self(n-1) + self(n-2)
-        return self.fibo_numbers[n]
+        return self.step(n)
 
 ############ CODE BLOCK 130 ################
 
@@ -99,11 +94,11 @@ def fibonacci(max_):
     :return: The table with all Fibonacci numbers till `max_`
     :rtype: ndarray[int, (max_)]
     """
-    fibo = np.zeros(max_+1, dtype=int)
-    fibo[1] = 1
+    fibo_numbers = np.zeros(max_+1, dtype=int)
+    fibo_numbers[0], fibo_numbers[1] = 0, 1
     for i in range(2, max_+1):
-        fibo[i] = fibo[i-1] + fibo[i-2]
-    return fibo
+        fibo_numbers[i] = fibo_numbers[i-1] + fibo_numbers[i-2]
+    return fibo_numbers
 
 ############ CODE BLOCK 140 ################
 
@@ -113,11 +108,11 @@ def recursive_fact(n):
 
     Note, that $fact(0) = 1$ and $fact(1) = 1$
     """
-    if n == 0:
+    if n < 0:
+        return None
+    elif n == 0:
         return 1
-    if n == 1:
-        return 1
-    return n * recursive_fact(n-1)
+    return n*recursive_fact(n - 1)
 
 ############ CODE BLOCK 150 ################
 
@@ -142,11 +137,9 @@ class Factorial():
         :return: fact(n)
         :rtype: int
         """
-        if n in self.fact_numbers:
-            return self.fact_numbers[n]
-        
-        self.fact_numbers[n] = n * self(n-1)
-        return self.fact_numbers[n]
+        if n < 0:
+            return None
+        return self.step(n)
             
     def step(self, n):
         """
@@ -157,7 +150,11 @@ class Factorial():
         :return: fact(n)
         :rtype: int
         """
-        return self(n)
+        if n in self.fact_numbers:
+            return self.fact_numbers[n]
+            
+        self.fact_numbers[n] = n * self.step(n-1)
+        return self.fact_numbers[n]
 
 ############ CODE BLOCK 200 ################
 
@@ -229,13 +226,19 @@ class Triangle():
 
         Thus, each row is represented as a list and each row ends with a new line.
         """
-        def helper(node):
-            if node is None:
-                return ""
-            return f"[{node.value}] {helper(node.left)}{helper(node.right)}\n"
-
-        return helper(self.top)
-
+        rows = []
+        row = [self.top]
+        for i in range(self.height):
+            row_values = []
+            for node in row:
+                row_values.append(node.value)
+            rows.append(str(row_values))
+            right_nodes = []
+            for node in row:
+                right_nodes.append(node.right)
+            row = [row[0].left] + right_nodes
+        return "\n".join(rows)
+        
     def show(self, path=None):
         """
         This method shows the current triangle.
@@ -352,16 +355,15 @@ class Primes():
 
         :param max_: The largest number to check if it is prime.
         :param max_: int
-        """
-        for i in range(self.primes[-1]+2, max_+1, 2):
-            is_prime = True
-            for prime in self.primes:
-                if i % prime == 0:
-                    is_prime = False
+        """       
+        for i in range(4, max_+1):
+            for j in self.primes:
+                if i % j == 0:
                     break
-            if is_prime:
-                self.primes.append(i)
-        return self.primes
+                if j*j > i:
+                    self.primes.append(i)
+                    break
+        return self.primes    
                 
     def __repr__(self):
         """
