@@ -785,10 +785,11 @@ class BFSSolverFastestPathMD(BFSSolverFastestPath):
         self.priorityqueue = [(source, 0)]
         self.history = {source: (None, 0)}
         self.destinations = destinations
-        self.destination = None
+        self.destination_nodes = set(destinations)
         self.vehicle_speed = vehicle_speed
-
-        raise NotImplementedError("Please complete this method")       
+        self.graph = graph
+        self.main_loop()
+        return self.find_path()     
 
     def base_case(self, node):
         """
@@ -799,7 +800,10 @@ class BFSSolverFastestPathMD(BFSSolverFastestPath):
         :return: returns True if the base case is reached.
         :rtype: bool
         """
-        raise NotImplementedError("Please complete this method")
+        if node in self.destination_nodes:
+            self.destination = node
+            return True
+        return False
 
 ############ CODE BLOCK 300 ################
 
