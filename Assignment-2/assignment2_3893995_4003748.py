@@ -485,6 +485,7 @@ class BFSSolverShortestPath():
         Hint, use object attributes to store results.
         """
         while self.priorityqueue:
+            self.priorityqueue = sorted(self.priorityqueue, key= lambda x: x[1])
             current, current_distance = self.priorityqueue.pop(0)
             if self.base_case(current):
                 return
@@ -536,7 +537,7 @@ class BFSSolverShortestPath():
         :type speed_limit: float
         """
         if new_node not in self.history:
-            self.priorityqueue.append((new_node, self.new_cost(node, distance, speed_limit)))
+            self.priorityqueue.append((new_node, 0))
             self.history[new_node] = (node, self.new_cost(node, distance, speed_limit))
     
     def next_step(self, node):
@@ -670,7 +671,6 @@ def create_country_graphs(map_):
     # its length is equal to the number of cities
     city_starts = map_.city_corners
     for city_index in range(len(city_starts)):
-        # city_start = map_.get_coordinate_in_city(city_index)
         city_start = city_starts[city_index]
         city_graph = Graph(city_map, city_start)
         graphs.append(city_graph)
@@ -892,7 +892,6 @@ def find_city(node, city_graphs):
     :param city_graphs: A list of graphs where each graph is a city
     :type city_graphs: list[Graph]
     """
-    # coordinate does not have to be a node in a graph
     for index, city in enumerate(city_graphs):
         if node in city:
             return index
