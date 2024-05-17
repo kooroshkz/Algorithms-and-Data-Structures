@@ -33,8 +33,10 @@ class Link():
         :return: A string representing the Link object.
         :rtype: str
         """
+        if self.next is None:
+            return f'{self.info}'
         # Change this to anything you like, such that you can easily print a Node object.
-        return super(Link, self).__repr__() 
+        return f"{self.info}, {self.next.__repr__()}" 
 
 class DLink(Link):
     """
@@ -84,15 +86,8 @@ class BasicLinkedList():
         :rtype: str
         """
         if self.start is None:
-            return "[]"
-        else:
-            result = "["
-            current = self.start
-            while current is not None:
-                result += f"{current.info}, "
-                current = current.next
-            result = result.rstrip(", ") + "]"
-            return result
+            return '[]'
+        return f'[{repr(self.start)}]'
 
 class BasicDLinkedList(BasicLinkedList):
     """
@@ -141,9 +136,9 @@ class QueueSingle(BasicLinkedList):
         if self.start is None:
             raise IndexError("pop from empty list")
         else:
-            first_info = self.start.info
+            value = self.start.info
             self.start = self.start.next
-            return first_info
+            return value
 
     def append(self, value):
         """
@@ -153,14 +148,13 @@ class QueueSingle(BasicLinkedList):
         :param value: This is the value that needs to be added to the linked list.
         :type value: int
         """
-        new_link = Link(value)
         if self.start is None:
-            self.start = new_link
+            self.start = Link(value)
         else:
             current = self.start
             while current.next is not None:
                 current = current.next
-            current.next = new_link         
+            current.next = Link(value)
 
 ############ CODE BLOCK 30 ################
 class Queue(BasicDLinkedList):
@@ -180,11 +174,11 @@ class Queue(BasicDLinkedList):
         if self.start is None:
             raise IndexError("pop from empty list")
         else:
-            first_info = self.start.info
+            value = self.start.info
             self.start = self.start.next
-            if self.start is None:
-                self.end = None
-            return first_info
+            if self.start is not None:
+                self.start.prev = None
+            return value
 
     def append(self, value):
         """
@@ -194,13 +188,12 @@ class Queue(BasicDLinkedList):
         :param value: This is the value that needs to be added to the queue.
         :type value: int
         """
-        new_link = DLink(value, previous=self.end)
         if self.start is None:
-            self.start = new_link
-            self.end = new_link
+            self.start = DLink(value)
+            self.end = self.start
         else:
-            self.end.next = new_link
-            self.end = new_link
+            self.end.next = DLink(value, self.end)
+            self.end = self.end.next
 
 ############ CODE BLOCK 40 ################
 class SingleLinkedList(BasicLinkedList):
@@ -222,31 +215,29 @@ class SingleLinkedList(BasicLinkedList):
         """
         if self.start is None:
             raise IndexError("pop from empty list")
-        
-        if n < 0:
-            raise IndexError("pop index out of range")
-        
         if n == 0:
-            return_value = self.start.info
+            rem_node = self.start.info
             self.start = self.start.next
-            return return_value
-        
+            return rem_node
         current = self.start
-        for i in range(n - 1):
-            if current.next is None:
+        while n>0:
+            if current is None:
                 raise IndexError("pop index out of range")
+            prev = current
             current = current.next
-        
-        return_value = current.next.info
-        current.next = current.next.next
-        return return_value
-        
+            n-=1
+        if current is None:
+            raise IndexError("pop index out of range")       
+        rem_node = current.info
+        prev.next = current.next
+        return rem_node     
+           
     def insert(self, value, n):
         """
         This method inserts at the nth element in the list a new value.
         This means that all other values are essentially pushed one index ahead. 
         This is a consequence of inserting a value in the "middle" of the list.
-     
+    
         If the value of n is greater than the length of the list,
         you need to insert the value at the end of the list.
 
@@ -255,24 +246,19 @@ class SingleLinkedList(BasicLinkedList):
         :param n: This value determines where the new value needs to be inserted.
         :type n: int
         """
-        new_link = Link(value)
         if self.start is None:
-            self.start = new_link
+            self.start = Link(value)
             return
-        
-        if n <= 0:
-            new_link.next = self.start
-            self.start = new_link
+        if n == 0:
+            self.start = Link(value, self.start)
             return
-        
         current = self.start
-        for _ in range(n - 1):
+        while n > 1:
             if current.next is None:
                 break
             current = current.next
-        
-        new_link.next = current.next
-        current.next = new_link
+            n -= 1
+        current.next = Link(value, current.next)
 
 ############ CODE BLOCK 41 ################
     def search(self, value):
@@ -312,29 +298,27 @@ class DoubleLinkedList(BasicDLinkedList):
         """
         if self.start is None:
             raise IndexError("pop from empty list")
-        
-        if n < 0:
-            raise IndexError("pop index out of range")
-        
         if n == 0:
-            return_value = self.start.info
+            rem_node = self.start.info
             self.start = self.start.next
             if self.start is not None:
                 self.start.prev = None
-            return return_value
-        
+            return rem_node
         current = self.start
-        for i in range(n):
-            if current.next is None:
+        while n > 0:
+            if current is None:
                 raise IndexError("pop index out of range")
+            prev = current
             current = current.next
-        
-        return_value = current.info
-        current.prev.next = current.next
+            n -= 1
+        if current is None:
+            raise IndexError("pop index out of range")       
+        rem_node = current.info
+        prev.next = current.next
         if current.next is not None:
-            current.next.prev = current.prev
-        return return_value
-           
+            current.next.prev = prev
+        return rem_node
+
     def insert(self, value, n):
         """
         This method inserts at the nth element in the list a new value.
@@ -349,28 +333,25 @@ class DoubleLinkedList(BasicDLinkedList):
         :param n: This value determines where the new value needs to be inserted.
         :type n: int
         """
-        new_link = DLink(value)
         if self.start is None:
-            self.start = new_link
+            self.start = DLink(value)
+            self.end = self.start
             return
-        
-        if n <= 0:
-            new_link.next = self.start
-            self.start.prev = new_link
-            self.start = new_link
+        if n == 0:
+            self.start = DLink(value, next=self.start)
+            self.start.next.prev = self.start
             return
-        
         current = self.start
-        for _ in range(n - 1):
+        while n > 1:
             if current.next is None:
                 break
             current = current.next
-        
-        new_link.prev = current
-        new_link.next = current.next
-        if current.next is not None:
-            current.next.prev = new_link
-        current.next = new_link
+            n -= 1
+        current.next = DLink(value, current, current.next)
+        if current.next.next is not None:
+            current.next.next.prev = current.next
+        else:
+            self.end = current.next
 
 ############ CODE BLOCK 46 ################
     def search(self, value):
