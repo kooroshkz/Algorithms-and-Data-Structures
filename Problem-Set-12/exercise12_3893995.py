@@ -251,7 +251,7 @@ class Prim():
         self.edges = {}
         
         self.main_loop()
-        return list(self.edges.items())    
+        return [(node, new_node) for (node, new_node), weight in self.edges.items()]
 
     def main_loop(self):
         """
@@ -264,14 +264,11 @@ class Prim():
             print("All nodes that are in history are colored green.\nThe minimal edge are colored red, given the history.")
         
         while self.priorityqueue:
-            # Get the node with the smallest edge weight
             self.priorityqueue.sort(key=lambda x: x[1])
             current_node, current_weight = self.priorityqueue.pop(0)
 
             for neighbor, weight in self.next_step(current_node):
                 self.step(current_node, neighbor, weight)
-
-            # This shows each step of Prim's algorithm. 
             if self.show_intermediate:
                 self.graph.show(list(self.edges.items()), list(self.history))
 
