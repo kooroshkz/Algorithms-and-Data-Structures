@@ -844,10 +844,10 @@ def find_path(coordinate_A, coordinate_B, map_, vehicle_speed, find_at_most=3):
 
     city_A, city_B = find_city(nodes_A[0], city_graphs), find_city(nodes_B[0], city_graphs)
 
-    # Debugging: print city_A and city_B
-    print(f"city_A: {city_A}, city_B: {city_B}")
-    print(f"city_graphs length: {len(city_graphs)}")
-    print(f"nodes_A: {nodes_A}, nodes_B: {nodes_B}")
+    # debugging
+    # print(f"city_A: {city_A}, city_B: {city_B}")
+    # print(f"city_graphs length: {len(city_graphs)}")
+    # print(f"nodes_A: {nodes_A}, nodes_B: {nodes_B}")
 
     if city_A is None or city_B is None:
         raise ValueError("Could not find city for start or end node.")
@@ -859,11 +859,9 @@ def find_path(coordinate_A, coordinate_B, map_, vehicle_speed, find_at_most=3):
     city_exits_A = [(node, 0) for node in all_city_exits if node in city_graphs[city_A]]
     city_exits_B = [(node, 0) for node in all_city_exits if node in city_graphs[city_B]]
 
-    # find the shortest time, path from any node A to any exit A
     path_A, cost_A = min(BFSMP(city_graphs[city_A], nodes_time_A, city_exits_A, vehicle_speed), key=lambda x:x[1])
     A_coordinate_to_exit = [coordinate_A] + list(path_A)
 
-    # find the shortest time, path from any node B to any exit B
     path_B, cost_B = min(BFSMP(city_graphs[city_B], city_exits_B, nodes_time_B, vehicle_speed), key=lambda x:x[1])
     B_exit_to_coordinate = list(path_B) + [coordinate_B]
     
