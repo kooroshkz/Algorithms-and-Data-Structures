@@ -102,13 +102,15 @@ class Graph():
         :return: A 2D numpy array containing the adjacency matrix
         :rtype: np.ndarray[bool]
         """
-        vertices = list(adjacency_list.keys())
-        matrix = np.zeros((len(vertices), len(vertices)), dtype=int)
-        for i, vertex in enumerate(vertices):
-            for edge in adjacency_list[vertex]:
-                j = vertices.index(edge)
-                matrix[i, j] = 1
-        return matrix
+        idx=[]
+        for x in adjacency_list:
+            idx.append(x)
+        n = len(adjacency_list)
+        adjacency_matrix = np.zeros((n, n), dtype=int)
+        for i in adjacency_list:
+            for j in adjacency_list[i]:
+                adjacency_matrix[idx.index(i)][idx.index(j)]=1
+        return adjacency_matrix
     
     def show(self):
         """
@@ -145,9 +147,13 @@ class Graph():
         :return: An adjacency list representing a graph.
         :rtype: dict[int, set[int]]
         """
-        adjacency_list = {}
-        for i, row in enumerate(adjacency_matrix):
-            adjacency_list[i] = set(np.where(row == 1)[0])
+        n=len(adjacency_matrix)
+        adjacency_list={}
+        for i in range(0, n):
+            adjacency_list[i]=set()
+            for j in range(0, n):
+                if adjacency_matrix[i][j]==1:
+                    adjacency_list[i].add(j)
         return adjacency_list
 
 ############ CODE BLOCK 4 ################
@@ -158,11 +164,12 @@ class Graph():
         :return: This returns a graph object which is undirected.
         :rtype: Graph
         """
-        undirected_graph = copy.deepcopy(self)
-        for vertex, edges in self.adjacency_list.items():
-            for edge in edges:
-                undirected_graph.add_edge(edge, vertex)
-        return undirected_graph
+        g = Graph()
+        g.adjacency_list = self.adjacency_list
+        for i in g.adjacency_list:
+            for j in g.adjacency_list[i]:
+                g.adjacency_list[j].add(i)
+        return g
 
 ############ CODE BLOCK 5 ################
     def has_two_or_less_odd_vertices(self):
@@ -179,11 +186,16 @@ class Graph():
         :rtype: bool
         """
         g = self.to_undirected_graph()
-        odd_vertices = 0
-        for vertex, edges in g.adjacency_list.items():
-            if len(edges) % 2 == 1 and vertex not in edges:
-                odd_vertices += 1
-        return odd_vertices <= 2
+        counter = 0
+        for i in self.adjacency_list:
+            neighbour_sum = len(self.adjacency_list[i])
+            if i in self.adjacency_list[i]:
+                neighbour_sum-=1
+            if neighbour_sum%2!=0:
+                counter+=1
+        if counter<=2:
+            return True
+        return False
 
 ############ CODE BLOCK 6 ################
     def invert_edges(self):
@@ -195,11 +207,13 @@ class Graph():
         :return: A new graph with the edge inverted.
         :rtype: Graph
         """
-        inverted_graph = copy.deepcopy(self)
-        for vertex, edges in self.adjacency_list.items():
-            for edge in edges:
-                inverted_graph.add_edge(edge, vertex)
-        return inverted_graph
+        g = Graph()
+        for i in self.adjacency_list:
+            g.adjacency_list[i] = set()
+        for i in self.adjacency_list:
+            for j in self.adjacency_list[i]:
+                g.adjacency_list[j].add(i) 
+        return g
 
 
 ############ END OF CODE BLOCKS, START SCRIPT BELOW! ################

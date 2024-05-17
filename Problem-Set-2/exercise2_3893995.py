@@ -37,7 +37,13 @@ class Node():
         :rtype: str
         """
         # Change this to anything you like, such that you can easily print a Node object.
-        return super(Node, self).__repr__()
+        if self.left is None and self.right is None:
+            return f'{self.info}'
+        elif self.left is None and self.right is not None:
+            return f'{self.info} -> [{self.right.__repr__()}]' 
+        elif self.left is not None and self.right is None:
+            return f'{self.info} -> [{self.left.__repr__()}]'
+        return f'{self.info} -> [{self.left.__repr__()}, {self.right.__repr__()}]'
 
 ############ CODE BLOCK 20 ################
 class BinaryTree():
@@ -68,21 +74,17 @@ class BinaryTree():
         """
         if self.root is None:
             self.root = Node(value)
-        else:
-            current = self.root
-            while True:
-                if value <= current.info:
-                    if current.left is None:
-                        current.left = Node(value)
-                        break
-                    else:
-                        current = current.left
-                else:
-                    if current.right is None:
-                        current.right = Node(value)
-                        break
-                    else:
-                        current = current.right
+        next_nodes = [self.root]
+        while next_nodes:
+            current = next_nodes.pop(0)
+            if current.left is None:
+                current.left = Node(value)
+                break
+            if current.right is None:
+                current.right = Node(value)
+                break
+            next_nodes.append(current.left)
+            next_nodes.append(current.right)
 
     def show(self, show_compact=False):
         """
@@ -165,10 +167,12 @@ class BinaryTree():
         :rtype: int
         """
         if subtree is None:
-            return float('-inf')
-        else:
-            return max(subtree.info, BinaryTree.get_highest_subtree_value(subtree.left), BinaryTree.get_highest_subtree_value(subtree.right))
-        
+            return -1
+        maximum = subtree.info
+        max_left = BinaryTree.get_highest_subtree_value(subtree.left)
+        max_right = BinaryTree.get_highest_subtree_value(subtree.right)
+        return max(maximum, max_left, max_right)
+
     def get_highest_value(self):
         """
         Gets the highest value out of a binary tree (not a binary search tree!!).
@@ -177,7 +181,7 @@ class BinaryTree():
         :return: The highest value within this tree.
         :rtype: int
         """
-        return BinaryTree.get_highest_subtree_value(self.root)
+        return self.get_highest_subtree_value(self.root)
         
     @staticmethod
     def count_subtree_leafs(subtree):
@@ -192,10 +196,9 @@ class BinaryTree():
         """
         if subtree is None:
             return 0
-        elif subtree.left is None and subtree.right is None:
+        if subtree.left is None and subtree.right is None:
             return 1
-        else:
-            return BinaryTree.count_subtree_leafs(subtree.left) + BinaryTree.count_subtree_leafs(subtree.right)
+        return BinaryTree.count_subtree_leafs(subtree.left) + BinaryTree.count_subtree_leafs(subtree.right)
 
 
     def count_leafs(self):
@@ -206,7 +209,7 @@ class BinaryTree():
         :return: The number of leafs in the tree.
         :rtype: int
         """
-        return BinaryTree.count_subtree_leafs(self.root)
+        return self.count_subtree_leafs(self.root)
 
     @staticmethod
     def get_subtree_height(subtree):
@@ -220,10 +223,10 @@ class BinaryTree():
         :rtype: int
         """
         if subtree is None:
-            return 0
-        else:
-            return 1 + max(BinaryTree.get_subtree_height(subtree.left), BinaryTree.get_subtree_height(subtree.right))
-
+            return -1
+        height_left = BinaryTree.get_subtree_height(subtree.left)
+        height_right = BinaryTree.get_subtree_height(subtree.right)
+        return max(height_left, height_right) + 1
 
     def get_height(self):
         """
@@ -233,7 +236,7 @@ class BinaryTree():
         :return: The height of the tree.
         :rtype: int
         """
-        return BinaryTree.get_subtree_height(self.root)
+        return self.get_subtree_height(self.root)
 
 ############ CODE BLOCK 22 ################
     def __repr__(self):
@@ -320,12 +323,9 @@ class BinarySearchTree(BinaryTree):
         """
         if subtree is None:
             subtree = self.root
-        if subtree is None:
-            return float('-inf')
-        elif subtree.right is None:
-            return subtree.info
-        else:
-            return self.get_highest_value(subtree.right)
+        while subtree.right is not None:
+            subtree = subtree.right
+        return subtree.info
 
 ############ CODE BLOCK 42 ################
     def get_lowest_value(self, subtree=None):
@@ -344,11 +344,10 @@ class BinarySearchTree(BinaryTree):
         if subtree is None:
             subtree = self.root
         if subtree is None:
-            return float('inf')
-        elif subtree.left is None:
-            return subtree.info
-        else:
-            return self.get_lowest_value(subtree.left)
+            return inf
+        while subtree.left is not None:
+            subtree=subtree.left
+        return subtree.info
 
     def is_binary_search_tree(self, subtree=None):
         """
@@ -365,20 +364,18 @@ class BinarySearchTree(BinaryTree):
         """
         if subtree is None:
             subtree = self.root
-        if subtree is None:
+        
+        if subtree.left is not None and self.get_highest_value(subtree.left) > subtree.info: 
+            return False
+        elif subtree.left is None:
             return True
         
-        if subtree.left is None:
-            left_valid = True
-        else:
-            left_valid = subtree.info > self.get_lowest_value(subtree.left) and self.is_binary_search_tree(subtree.left)
+        if subtree.right is not None and self.get_lowest_value(subtree.right) <= subtree.info:
+            return False
+        elif subtree.right is None:
+            return True
             
-        if subtree.right is None:
-            right_valid = True
-        else:
-            right_valid = subtree.info < self.get_highest_value(subtree.right) and self.is_binary_search_tree(subtree.right)
-        
-        return left_valid and right_valid
+        return self.is_binary_search_tree(subtree.left) and self.is_binary_search_tree(subtree.right)
 
 ############ CODE BLOCK 43 ################
     def remove(self, value):
@@ -388,49 +385,41 @@ class BinarySearchTree(BinaryTree):
         :param value: The value that needs to be deleted.
         :type value: int
         """
-
-        parent, node = self.search(value)
-        
-        if node is None:
-            return  # Node not found, nothing to remove
-        
-        if node.left is None and node.right is None:
-            # Case 1: Node is a leaf node
+        parent, current = self.search(value)
+        if current is None:
+            return
+        if current.left is None and current.right is None:
             if parent is None:
-                self.root = None  # Node is root and tree has only one node
-            elif parent.left == node:
+                self.root = None
+            elif parent.left == current:
                 parent.left = None
             else:
                 parent.right = None
-                
-        elif node.left is None or node.right is None:
-            # Case 2: Node has only one child
-            if node.left is None:
-                child = node.right
-            else:
-                child = node.left
-                
+        elif current.left is None:
             if parent is None:
-                self.root = child  # Node is root
-            elif parent.left == node:
-                parent.left = child
+                self.root = current.right
+            elif parent.left == current:
+                parent.left = current.right
             else:
-                parent.right = child
-                
+                parent.right = current.right
+        elif current.right is None:
+            if parent is None:
+                self.root = current.left
+            elif parent.left == current:
+                parent.left = current.left
+            else:
+                parent.right = current.left
         else:
-            # Case 3: Node has two children
-            successor_parent = node
-            successor = node.right
-            while successor.left is not None:
-                successor_parent = successor
-                successor = successor.left
-                
-            node.info = successor.info
-            
-            if successor_parent.left == successor:
-                successor_parent.left = successor.right
+            parent_successor = current
+            current_successor = current.right
+            while current_successor.left is not None:
+                parent_successor = current_successor
+                current_successor = current_successor.left
+            current.info = current_successor.info
+            if parent_successor.left == current_successor:
+                parent_successor.left = current_successor.right
             else:
-                successor_parent.right = successor.right
+                parent_successor.right = current_successor.right     
 
 ############ CODE BLOCK 50 ################
 class NodeD():
@@ -462,7 +451,12 @@ class NodeD():
         :rtype: str
         """
         # Change this to anything you like, such that you can easily print a Node object.
-        return super(NodeD, self).__repr__() 
+        if self.left is None and self.right is None:
+            return f'{self.info}'
+        elif self.left is None and self.right is not None:
+            return f'{self.info} -> [{self.right.__repr__()}]' 
+        elif self.left is not None and self.right is None:
+            return f'{self.info} -> [{self.left.__repr__()}]'
 
 ############ CODE BLOCK 60 ################
 class BinarySearchTreeDouble(BinaryTree):
@@ -519,7 +513,20 @@ class BinarySearchTreeDouble(BinaryTree):
         if self.root is None:
             self.root = NodeD(value)
         else:
-            self._add(self.root, value)
+            current = self.root
+            while True:
+                if current.info == value:
+                    return
+                if current.info < value:
+                    if current.right is None:
+                        current.right = NodeD(value, current)
+                        return
+                    current = current.right
+                else:
+                    if current.left is None:
+                        current.left = NodeD(value, current)
+                        return
+                    current = current.left
 
     def remove(self, value):
         """
@@ -528,50 +535,41 @@ class BinarySearchTreeDouble(BinaryTree):
         :param value: The value that needs to be deleted.
         :type value: int
         """
-        node_to_remove = self.search(value)
-        
-        if node_to_remove is None:
-            return  # Node not found, nothing to remove
-        
-        parent = node_to_remove.parent
-        
-        if node_to_remove.left is None and node_to_remove.right is None:
-            # Case 1: Node is a leaf node
-            if parent is None:
-                self.root = None  # Node is root and tree has only one node
-            elif parent.left == node_to_remove:
-                parent.left = None
+        current = self.search(value)
+        if current is None:
+            return
+        if current.left is None and current.right is None:
+            if current.parent is None:
+                self.root = None
+            elif current.parent.left == current:
+                current.parent.left = None
             else:
-                parent.right = None
-                
-        elif node_to_remove.left is None or node_to_remove.right is None:
-            # Case 2: Node has only one child
-            if node_to_remove.left is None:
-                child = node_to_remove.right
+                current.parent.right = None
+        elif current.left is None:
+            if current.parent is None:
+                self.root = current.right
+            elif current.parent.left == current:
+                current.parent.left = current.right
             else:
-                child = node_to_remove.left
-                
-            if parent is None:
-                self.root = child  # Node is root
-            elif parent.left == node_to_remove:
-                parent.left = child
+                current.parent.right = current.right
+        elif current.right is None:
+            if current.parent is None:
+                self.root = current.left
+            elif current.parent.left == current:
+                current.parent.left = current.left
             else:
-                parent.right = child
-                
+                current.parent.right = current.left
         else:
-            # Case 3: Node has two children
-            successor_parent = node_to_remove
-            successor = node_to_remove.right
-            while successor.left is not None:
-                successor_parent = successor
-                successor = successor.left
-                
-            node_to_remove.info = successor.info
-            
-            if successor_parent.left == successor:
-                successor_parent.left = successor.right
+            parent_successor = current
+            current_successor = current.right
+            while current_successor.left is not None:
+                parent_successor = current_successor
+                current_successor = current_successor.left
+            current.info = current_successor.info
+            if parent_successor.left == current_successor:
+                parent_successor.left = current_successor.right
             else:
-                successor_parent.right = successor.right
+                parent_successor.right = current_successor.right
 
 
 ############ END OF CODE BLOCKS, START SCRIPT BELOW! ################
