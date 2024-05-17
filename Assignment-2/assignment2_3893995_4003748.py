@@ -842,13 +842,23 @@ def find_path(coordinate_A, coordinate_B, map_, vehicle_speed, find_at_most=3):
     nodes_time_A = path_length(coordinate_A, nodes_A, map_, vehicle_speed)
     nodes_time_B = path_length(coordinate_B, nodes_B, map_, vehicle_speed)
 
-    city_A, city_B = find_city(nodes_A[0], city_graphs), find_city(nodes_B[0], city_graphs) 
+    city_A, city_B = find_city(nodes_A[0], city_graphs), find_city(nodes_B[0], city_graphs)
+
+    # Debugging: print city_A and city_B
+    print(f"city_A: {city_A}, city_B: {city_B}")
+    print(f"city_graphs length: {len(city_graphs)}")
+    print(f"nodes_A: {nodes_A}, nodes_B: {nodes_B}")
+
+    if city_A is None or city_B is None:
+        raise ValueError("Could not find city for start or end node.")
+
     all_city_exits = map_.get_all_city_exits()
 
-    # find exits for city B and city B and change the datatype for city exits 
+    # find exits for city A and city B and change the datatype for city exits 
     # to make them compatible with the BFS solver
-    city_exits_A, city_exits_B = [(node, 0) for node in all_city_exits if node in city_graphs[city_A]], [(node, 0) for node in all_city_exits if node in city_graphs[city_B]]
-    
+    city_exits_A = [(node, 0) for node in all_city_exits if node in city_graphs[city_A]]
+    city_exits_B = [(node, 0) for node in all_city_exits if node in city_graphs[city_B]]
+
     # find the shortest time, path from any node A to any exit A
     path_A, cost_A = min(BFSMP(city_graphs[city_A], nodes_time_A, city_exits_A, vehicle_speed), key=lambda x:x[1])
     A_coordinate_to_exit = [coordinate_A] + list(path_A)
@@ -876,6 +886,7 @@ def find_path(coordinate_A, coordinate_B, map_, vehicle_speed, find_at_most=3):
         
     return total_path, total_cost
 
+
 # added this helper function 
 def find_city(node, city_graphs):
     """
@@ -890,6 +901,7 @@ def find_city(node, city_graphs):
     for index, city in enumerate(city_graphs):
         if node in city:
             return index
+    return None
 
 
 ############ END OF CODE BLOCKS, START SCRIPT BELOW! ################
