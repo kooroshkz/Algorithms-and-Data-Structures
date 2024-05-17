@@ -24,7 +24,6 @@ class Permutations():
         """
         # All actions are the same, so it is helpful to make an object attribute.
         self.list = list_
-
         return self.step([])
 
     def step(self, chosen_list):
@@ -36,17 +35,17 @@ class Permutations():
         :type chosen_list: list[Objects]
         :return: A list containing all the permutations, from the current space-state.
         :type: list[list[Objects]]
-        """
-        # If the permutation is correct, we can return it.
+        """ 
         if len(chosen_list) == len(self.list):
-            return [chosen_list]
-
-        # If the permutation is incorrect, we can return an empty list.
-        if not self.is_not_incorrect(chosen_list):
-            return []
-
-        # If the permutation is not incorrect, we can generate the next step.
-        return self.next_step(chosen_list, self.list)
+            return [[]] 
+        permutations = []
+        for value in self.list:
+            new_permutation = [value]
+            next_permutations = self.next_step(chosen_list, value)
+            for permutation in next_permutations:
+                if self.is_not_incorrect(new_permutation + permutation):
+                    permutations.append(new_permutation + permutation)
+        return permutations
         
     def next_step(self, chosen_list, chosen_object):
         """
@@ -59,24 +58,8 @@ class Permutations():
         :return: This method returns what self.step returns
         :type: list[list[Objects]]
         """
-        # We need to make a copy of the list, so we can remove the object from the list.
-        chosen_object = copy.deepcopy(chosen_object)
-        permutations = []
+        return self.step(chosen_list + [chosen_object])
         
-        # We iterate over all objects in the list.
-        for obj in chosen_object:
-            # We remove the object from the list.
-            chosen_object.remove(obj)
-            # We add the object to the chosen list.
-            new_chosen_list = copy.deepcopy(chosen_list)
-            new_chosen_list.append(obj)
-            # We call the next step with the new state-space.
-            permutations += self.step(new_chosen_list)
-            # We add the object back to the list.
-            chosen_object.append(obj)
-        
-        return permutations
-    
     def is_not_incorrect(self, chosen_list):
         """
         This method returns if the state-space is (partially) correct aka if it can become a permutation.
@@ -86,8 +69,7 @@ class Permutations():
         :return: Return if the permutation variable is or is not a permutation.
         :rtype: boolean
         """
-        # We check if the list is a permutation.
-        return len(set(chosen_list)) == len(chosen_list)
+        return len(chosen_list) == len(set(chosen_list))
 
 ############ CODE BLOCK 20 ################
 def constraint(queens, col):
@@ -102,11 +84,12 @@ def constraint(queens, col):
     :rtype: bool
     """
     row = len(queens)
-    for r, c in enumerate(queens):
-        if c == col or r - c == row - col or r + c == row + col:
-            return False
+    queens_row = 0
+    for queens_col in queens:
+        if col == queens_col or abs(col - queens_col) == abs(row - queens_row):
+            return False 
+        queens_row += 1
     return True
-       
 
 def rec_nQueens(size, queens=None):
     """
@@ -209,12 +192,14 @@ class N_Queens():
         :type col: int
         :return: The return of the step method
         :rtype: list[int]
-        """
+            """
         row = len(queens)
-        for r, c in enumerate(queens):
-            if c == col or r - c == row - col or r + c == row + col:
+        queens_row = 0
+        for queens_col in queens:
+            if col == queens_col or abs(col - queens_col) == abs(row - queens_row):
                 return False
-        return True 
+            queens_row += 1
+        return True
 
 ############ CODE BLOCK 25 ################
 class N_rooks(N_Queens):
@@ -231,7 +216,13 @@ class N_rooks(N_Queens):
         :return: The return of the step method
         :rtype: list[int]
         """
-        return col not in rooks  
+        row = len(rooks)
+        rooks_row = 0
+        for rooks_col in rooks:
+            if col == rooks_col:
+                return False
+            rooks_row += 1
+        return True
 
 ############ CODE BLOCK 28 ################
 class N_Queens_All(N_Queens):        
@@ -251,11 +242,14 @@ class N_Queens_All(N_Queens):
         
         solutions = []
         for col in range(self.size):
-            candidate_sol = self.next_step(queens, col)
-            if candidate_sol:
-                solutions += candidate_sol
-                
-        self.clean_up(queens)
+            if self.constraint(queens, col):
+                queens.append(col)
+                candidate_queens = queens[:]
+                candidate_sol = self.step(candidate_queens)
+                if candidate_sol:
+                    solutions.extend(candidate_sol)
+                self.clean_up(queens)
+
         return solutions
 
 ############ CODE BLOCK 30 ################
@@ -305,7 +299,7 @@ class Graph():
             for destination in destinations:
                 adjacency_list[destination].add(source)
             
-        return adjacency_list    
+        return adjacency_list       
 
     def set_graph(self, adjacency_list):
         """
@@ -318,7 +312,8 @@ class Graph():
         :type adjacency_list: dict[str/int, set[str/int]]
         """
         self.adjacency_list = adjacency_list
-        self.color_list = {node: None for node in self.adjacency_list}
+        for node in adjacency_list:
+            self.color_list[node] = None     
 
     def show(self):
         """
@@ -352,21 +347,25 @@ class Graph():
         nodes = list(self.adjacency_list.keys())
         return self._step(nodes)
 
-    def _step(self, nodes):
-        """
-        One step in the coloring of the graph.
+        def _step(self, nodes):
+            """
+            One step in the coloring of the graph.
 
-        :param nodes: A list of nodes that are not colored yet.
-        :type nodes: list[int/str]
-        """
-        for node in nodes:
-            for color in self.colors:
+            :param nodes: A list of nodes that are not colored yet.
+            :type nodes: list[int/str]
+            """
+            if not nodes:
+                return True
+
+            node = nodes[0]
+            colors = ['r', 'g', 'b']
+            for color in colors:
                 self.color_list[node] = color
                 if self._is_correct(node):
-                    if self._next_step(nodes):
+                    if self._step(self._next_step(nodes)):
                         return True
             self._clean_up(node)
-        return False
+            return False
 
     def _clean_up(self, node):
         """
@@ -384,10 +383,7 @@ class Graph():
         :param nodes: A list of nodes that are not colored yet.
         :type nodes: list[int/str]
         """
-        if not nodes:
-            return True
-        next_node = nodes.pop()
-        return self._step(nodes)
+        return nodes[1:]
     
     def _is_correct(self, node):
         """
@@ -413,16 +409,13 @@ class PermutationsGenerator(Permutations):
         :return: A list containing all the permutations, from the current space-state.
         :type: list[list[Objects]]
         """
-        # If the permutation is correct, we can return it.
-        if len(chosen_list) == len(self.list):
-            return [chosen_list]
-
-        # If the permutation is incorrect, we can return an empty list.
-        if not self.is_not_incorrect(chosen_list):
-            return []
-
-        # If the permutation is not incorrect, we can generate the next step.
-        return self.next_step(chosen_list, self.list)
+        if len(chosen_list) == len(self.objects):
+            yield chosen_list
+        else:
+            for obj in self.objects:
+                if obj not in chosen_list:
+                    new_chosen = chosen_list + [obj]
+                    yield from self.step(new_chosen)
 
 
 ############ END OF CODE BLOCKS, START SCRIPT BELOW! ################
