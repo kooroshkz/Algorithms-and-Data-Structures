@@ -293,17 +293,8 @@ class Graph(GraphBluePrint):
         # reworked this completely, should work now
         width, height = len(self.map[0]) - 1, len(self.map[:,1]) - 1
         for node in self.adjacency_list:
-            node_edges = []
+            node_edges = set()
             for direction in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
-                # check if we are not outside of the grid by going to the next step
-                # by either going to negative values or values higher than the grid size
-                # if (node[0] == 0 and direction[0] == -1) or (node[1] == 0 and direction[1] == -1):
-                #     continue
-                # elif (node[0] == height and direction[0] == 1) or (node[1] == width and direction[1] == 1):
-                #     continue
-                # elif self.map[node[0] + direction[0]][node[1] + direction[1]] == 0:
-                #     continue
-                
                 new_height, new_width = node[0] + direction[0], node[1] + direction[1]
                 if new_width < 0 or new_height < 0 or new_width > width or new_height > height:
                     continue
@@ -311,7 +302,7 @@ class Graph(GraphBluePrint):
                     continue
                 next_node, distance = self.find_next_node_in_adjacency_list(node, direction)
                 speed_limit = self.map[next_node[0], next_node[1]]
-                node_edges.append((next_node, distance, speed_limit))
+                node_edges.add((next_node, distance, speed_limit))
             self.adjacency_list[node] = node_edges
 
 
@@ -485,13 +476,13 @@ class BFSSolverShortestPath():
         Hint, use object attributes to store results.
         """
         while self.priorityqueue:
-            self.priorityqueue = sorted(self.priorityqueue, key= lambda x: x[1])
+            self.priorityqueue = sorted(self.priorityqueue, key=lambda x: x[1])
             current, current_distance = self.priorityqueue.pop(0)
             if self.base_case(current):
                 return
             for new_node in self.next_step(current):
                 current_distance = np.sqrt((current[0] - new_node[0])**2 + (current[1] - new_node[1])**2)
-                self.step(current, new_node, current_distance, graph.map.grid[new_node[0]][new_node[1]])
+                self.step(current, new_node, current_distance, self.graph.map.grid[new_node[0]][new_node[1]])
 
     def base_case(self, node):
         """
