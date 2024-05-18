@@ -825,21 +825,21 @@ class BFSSolverFastestPathMD(BFSSolverFastestPath):
 def path_length(coordinate, closest_nodes, map_, vehicle_speed):
     return [(node, (abs(node[0] - coordinate[0]) + abs(node[1] - coordinate[1])) / min(vehicle_speed, map_[coordinate])) for node in closest_nodes] 
 
-def find_path(coord_A, coord_B, map_, speed, find_at_most=3):
+def find_path(coordinate_A, coordinate_B, map_, speed, find_at_most=3):
     """
-    Find the optimal path from coord_A to coord_B.
+    Find the optimal path from coordinate_A to coordinate_B.
 
-    :param coord_A: The start coordinate
-    :type coord_A: tuple[int]
-    :param coord_B: The end coordinate
-    :type coord_B: tuple[int]
+    :param coordinate_A: The start coordinate
+    :type coordinate_A: tuple[int]
+    :param coordinate_B: The end coordinate
+    :type coordinate_B: tuple[int]
     :param map_: The map on which the path needs to be found
     :type map_: Map
     :param speed: The maximum vehicle speed
     :type speed: float
     :param find_at_most: Number of routes to find, defaults to 3
     :type find_at_most: int, optional
-    :return: The path between coord_A and coord_B, and the cost
+    :return: The path between coordinate_A and coordinate_B, and the cost
     :rtype: list[tuple[int]], float
     """
          ## Review this part again, not sure if it is correct
@@ -850,10 +850,10 @@ def find_path(coord_A, coord_B, map_, speed, find_at_most=3):
     city_map = map_.get_city_map()
    
     BFSMP = BFSSolverMultipleFastestPaths(find_at_most) # Simplified the name
-    nodes_A = coordinate_to_node(map_, country, coord_A)
-    nodes_B = coordinate_to_node(map_, country, coord_B)
-    time_A = path_length(coord_A, nodes_A, map_, speed)
-    time_B = path_length(coord_B, nodes_B, map_, speed)
+    nodes_A = coordinate_to_node(map_, country, coordinate_A)
+    nodes_B = coordinate_to_node(map_, country, coordinate_B)
+    time_A = path_length(coordinate_A, nodes_A, map_, speed)
+    time_B = path_length(coordinate_B, nodes_B, map_, speed)
 
     city_A, city_B = find_city(nodes_A[0], city_graphs), find_city(nodes_B[0], city_graphs)
 
@@ -870,9 +870,9 @@ def find_path(coord_A, coord_B, map_, speed, find_at_most=3):
     exits_A = [(node, 0) for node in all_exits if node in city_graphs[city_A]]
     exits_B = [(node, 0) for node in all_exits if node in city_graphs[city_B]]
     path_A, cost_A = min(BFSMP(city_graphs[city_A], time_A, exits_A, speed), key=lambda x: x[1])
-    A_to_exit = [coord_A] + list(path_A)
+    A_to_exit = [coordinate_A] + list(path_A)
     path_B, cost_B = min(BFSMP(city_graphs[city_B], exits_B, time_B, speed), key=lambda x: x[1])
-    exit_to_B = list(path_B) + [coord_B]
+    exit_to_B = list(path_B) + [coordinate_B]
     exit_A, exit_B = path_A[-1], path_B[0]
     mid_path, mid_cost = BFSSolverFastestPath()(highway_graph, exit_A, exit_B, speed)
 
@@ -882,7 +882,7 @@ def find_path(coord_A, coord_B, map_, speed, find_at_most=3):
     # Check if we are in the same city
     if city_A == city_B:
         city_path, city_cost = min(BFSMP(city_graphs[city_A], time_A, time_B, speed), key=lambda x: x[1])
-        city_coords = [coord_A] + list(city_path) + [coord_B]
+        city_coords = [coordinate_A] + list(city_path) + [coordinate_B]
         city_coords = list(dict.fromkeys(city_coords))
         candidates = [(total_path, total_cost), (city_coords, city_cost)]
         return min(candidates, key=lambda x: x[1])  # Return the cheaper path
