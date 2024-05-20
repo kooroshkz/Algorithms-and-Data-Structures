@@ -540,9 +540,10 @@ class BFSSolverShortestPath():
         :param speed_limit: The speed limit on the road from node to new_node. 
         :type speed_limit: float
         """
-        if new_node not in self.history:
-            self.priorityqueue.append((new_node, 0))
-            self.history[new_node] = (node, self.new_cost(node, distance, speed_limit))
+        cost = self.new_cost(node, distance, speed_limit)
+        if new_node not in self.history or cost < self.history[new_node][1]:
+            self.priorityqueue.append((new_node, cost))
+            self.history[new_node] = (node, cost)
     
     def next_step(self, node):
         """
