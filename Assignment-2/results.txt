@@ -1,0 +1,70 @@
+Time for FloodFillSolver: 0.00016736984252929688 seconds and Length of path: 2.0 on map: 1
+
+Time for FloodFillSolverGraph: 9.369850158691406e-05 seconds and Length of path: 2.0 on map: 1
+
+Time for BFSSolverShortestPath: 0.00010800361633300781 seconds and Length of path: 2.0 on map: 1
+
+Time for BFSSolverFastestPath: 5.412101745605469e-05 seconds and travel time: 0.06666666666666667 on map: 1
+
+Time for BFSSolverMultipleFastestPaths: 7.43865966796875e-05 seconds and travel time: 0.06666666666666667 on map: 1
+
+Time for BFSSolverFastestPathMD: 5.0067901611328125e-05 seconds and travel time: 0.06666666666666667 on map: 1
+
+find_path failed on map: 1
+
+Time for FloodFillSolver: 0.001552581787109375 seconds and Length of path: 20.0 on map: 2
+
+Time for FloodFillSolverGraph: 0.000179290771484375 seconds and Length of path: 28.0 on map: 2
+
+Time for BFSSolverShortestPath: 0.0017018318176269531 seconds and Length of path: 20.0 on map: 2
+
+Time for BFSSolverFastestPath: 0.0003285408020019531 seconds and travel time: 0.6933333333333334 on map: 2
+
+Time for BFSSolverMultipleFastestPaths: 0.00035762786865234375 seconds and travel time: 0.6933333333333334 on map: 2
+
+Time for BFSSolverFastestPathMD: 0.00031685829162597656 seconds and travel time: 0.6933333333333334 on map: 2
+
+find_path failed on map: 2
+
+Time for FloodFillSolver: 0.00948476791381836 seconds and Length of path: 53.0 on map: 3
+
+Time for FloodFillSolverGraph: 0.00038123130798339844 seconds and Length of path: 61.0 on map: 3
+
+Time for BFSSolverShortestPath: 0.0028061866760253906 seconds and Length of path: 53.0 on map: 3
+
+Time for BFSSolverFastestPath: 0.0030324459075927734 seconds and travel time: 1.1666666666666665 on map: 3
+
+Time for BFSSolverMultipleFastestPaths: 0.003407001495361328 seconds and travel time: 1.1666666666666665 on map: 3
+
+Time for BFSSolverFastestPathMD: 0.0038509368896484375 seconds and travel time: 1.1666666666666665 on map: 3
+
+find_path failed on map: 3
+
+Time for FloodFillSolver: 0.007944583892822266 seconds and Length of path: 43.0 on map: 4
+
+Time for FloodFillSolverGraph: 0.0013930797576904297 seconds and Length of path: 43.0 on map: 4
+
+Time for BFSSolverShortestPath: 0.0032749176025390625 seconds and Length of path: 43.0 on map: 4
+
+Time for BFSSolverFastestPath: 0.004126071929931641 seconds and travel time: 1.0733333333333333 on map: 4
+
+Time for BFSSolverMultipleFastestPaths: 0.0040645599365234375 seconds and travel time: 1.0733333333333333 on map: 4
+
+Time for BFSSolverFastestPathMD: 0.003903627395629883 seconds and travel time: 1.0733333333333333 on map: 4
+
+find_path failed on map: 4
+
+Time for FloodFillSolver: 0.17871809005737305 seconds and Length of path: 383.0 on map: 5
+
+Time for FloodFillSolverGraph: 0.0035660266876220703 seconds and Length of path: 835.0 on map: 5
+
+Time for BFSSolverShortestPath: 0.029100894927978516 seconds and Length of path: 383.0 on map: 5
+
+Time for BFSSolverFastestPath: 0.09393501281738281 seconds and travel time: 4.726666666666665 on map: 5
+
+Time for BFSSolverMultipleFastestPaths: 0.1414346694946289 seconds and travel time: 4.726666666666665 on map: 5
+
+Time for BFSSolverFastestPathMD: 0.1482090950012207 seconds and travel time: 4.726666666666665 on map: 5
+
+Time for find_path: 1.5820224285125732 seconds and travel time: 6.421666666666667 on map: 5
+
