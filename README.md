@@ -1,27 +1,32 @@
 # Algorithms and Data Structures
-### Assignments coding environment for Spring 2024
+## Excercises, Problem-Sets and Projects
 
+This repository is a centralized hub for problem sets, and projects for the "Algorithms and Data Structures". It is designed to facilitate learning and collaboration while solving challenging algorithmic and data structure problems.
 
-<br>
+---
 
-Contributers:
-- Mateusz Wilk 
-- Koorosh Komeilizadeh
+## Contributors
+- Mateusz Wilk  
+- Koorosh Komeilizadeh  
 
-<br>
+---
 
-**Lecturer:** Dr. J.N. van Rijn  
-**E-mail:** j.n.van.rijn@liacs.leidenuniv.nl  
-**Room number:** Snellius 116
+## Repository Structure
 
-## Released Projects
-
-Stay updated with the status of your assignments:
-
-| Assignment type | Status        |
-|-----------------|---------------|
-| Problem Set 0   | Uploaded      |
-| Problem Set 1   | Added to env  |
-| Problem Set 2   | Added to env  |
-| Team Project    | Added to env  |
- description, 0 items should be ignored, and the check method will return True if the sudoku is not completed yet, but there is no duplication based on rules.
+```plaintext
+.
+├── Group-Project-1
+│   ├── Code files, tests, and reports for the first group project.
+├── Group-Project-2
+│   ├── Second group project, focusing on grid-based algorithms and hierarchical structures.
+├── Problem-Set-0
+│   ├── Introductory exercises, including environment setup.
+├── Problem-Set-1
+│   ├── Exercises on basic data structures.
+├── Problem-Set-2
+│   ├── Challenges on trees and graph traversals.
+├── ...
+│   ├── Subsequent problem sets cover increasingly advanced topics.
+└── README.md
+    ├── This file.
+```
